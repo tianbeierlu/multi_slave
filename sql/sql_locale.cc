@@ -66,13 +66,13 @@ MY_LOCALE_ERRMSGS global_errmsgs[]=
 
 /***** LOCALE BEGIN ar_AE: Arabic - United Arab Emirates *****/
 static const char *my_locale_month_names_ar_AE[13] = 
- {"يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر", NullS };
+ {"?????","??????","????","?????","????","?????","?????","?????","??????","??????","??????","??????", NullS };
 static const char *my_locale_ab_month_names_ar_AE[13] = 
- {"ينا","فبر","مار","أبر","ماي","يون","يول","أغس","سبت","أكت","نوف","ديس", NullS };
+ {"???","???","???","???","???","???","???","???","???","???","???","???", NullS };
 static const char *my_locale_day_names_ar_AE[8] = 
- {"الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت ","الأحد", NullS };
+ {"???????","????????","????????","??????","??????","????? ","?????", NullS };
 static const char *my_locale_ab_day_names_ar_AE[8] = 
- {"ن","ث","ر","خ","ج","س","ح", NullS };
+ {"?","?","?","?","?","?","?", NullS };
 static TYPELIB my_locale_typelib_month_names_ar_AE = 
  { array_elements(my_locale_month_names_ar_AE)-1, "", my_locale_month_names_ar_AE, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ar_AE = 
@@ -102,13 +102,13 @@ MY_LOCALE my_locale_ar_AE
 
 /***** LOCALE BEGIN ar_BH: Arabic - Bahrain *****/
 static const char *my_locale_month_names_ar_BH[13] = 
- {"يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر", NullS };
+ {"?????","??????","????","?????","????","?????","?????","?????","??????","??????","??????","??????", NullS };
 static const char *my_locale_ab_month_names_ar_BH[13] = 
- {"ينا","فبر","مار","أبر","ماي","يون","يول","أغس","سبت","أكت","نوف","ديس", NullS };
+ {"???","???","???","???","???","???","???","???","???","???","???","???", NullS };
 static const char *my_locale_day_names_ar_BH[8] = 
- {"الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد", NullS };
+ {"???????","????????","????????","??????","??????","?????","?????", NullS };
 static const char *my_locale_ab_day_names_ar_BH[8] = 
- {"ن","ث","ر","خ","ج","س","ح", NullS };
+ {"?","?","?","?","?","?","?", NullS };
 static TYPELIB my_locale_typelib_month_names_ar_BH = 
  { array_elements(my_locale_month_names_ar_BH)-1, "", my_locale_month_names_ar_BH, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ar_BH = 
@@ -138,13 +138,13 @@ MY_LOCALE my_locale_ar_BH
 
 /***** LOCALE BEGIN ar_JO: Arabic - Jordan *****/
 static const char *my_locale_month_names_ar_JO[13] = 
- {"كانون الثاني","شباط","آذار","نيسان","نوار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول", NullS };
+ {"????? ??????","????","????","?????","????","??????","????","??","?????","????? ?????","????? ??????","????? ?????", NullS };
 static const char *my_locale_ab_month_names_ar_JO[13] = 
- {"كانون الثاني","شباط","آذار","نيسان","نوار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول", NullS };
+ {"????? ??????","????","????","?????","????","??????","????","??","?????","????? ?????","????? ??????","????? ?????", NullS };
 static const char *my_locale_day_names_ar_JO[8] = 
- {"الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد", NullS };
+ {"???????","????????","????????","??????","??????","?????","?????", NullS };
 static const char *my_locale_ab_day_names_ar_JO[8] = 
- {"الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد", NullS };
+ {"???????","????????","????????","??????","??????","?????","?????", NullS };
 static TYPELIB my_locale_typelib_month_names_ar_JO = 
  { array_elements(my_locale_month_names_ar_JO)-1, "", my_locale_month_names_ar_JO, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ar_JO = 
@@ -174,11 +174,11 @@ MY_LOCALE my_locale_ar_JO
 
 /***** LOCALE BEGIN ar_SA: Arabic - Saudi Arabia *****/
 static const char *my_locale_month_names_ar_SA[13] = 
- {"كانون الثاني","شباط","آذار","نيسـان","أيار","حزيران","تـمـوز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول", NullS };
+ {"????? ??????","????","????","??????","????","??????","??????","??","?????","????? ?????","????? ??????","????? ?????", NullS };
 static const char *my_locale_ab_month_names_ar_SA[13] = 
  {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec", NullS };
 static const char *my_locale_day_names_ar_SA[8] = 
- {"الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعـة","السبت","الأحد", NullS };
+ {"???????","????????","????????","??????","???????","?????","?????", NullS };
 static const char *my_locale_ab_day_names_ar_SA[8] = 
  {"Mon","Tue","Wed","Thu","Fri","Sat","Sun", NullS };
 static TYPELIB my_locale_typelib_month_names_ar_SA = 
@@ -210,13 +210,13 @@ MY_LOCALE my_locale_ar_SA
 
 /***** LOCALE BEGIN ar_SY: Arabic - Syria *****/
 static const char *my_locale_month_names_ar_SY[13] = 
- {"كانون الثاني","شباط","آذار","نيسان","نواران","حزير","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول", NullS };
+ {"????? ??????","????","????","?????","??????","????","????","??","?????","????? ?????","????? ??????","????? ?????", NullS };
 static const char *my_locale_ab_month_names_ar_SY[13] = 
- {"كانون الثاني","شباط","آذار","نيسان","نوار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول", NullS };
+ {"????? ??????","????","????","?????","????","??????","????","??","?????","????? ?????","????? ??????","????? ?????", NullS };
 static const char *my_locale_day_names_ar_SY[8] = 
- {"الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد", NullS };
+ {"???????","????????","????????","??????","??????","?????","?????", NullS };
 static const char *my_locale_ab_day_names_ar_SY[8] = 
- {"الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد", NullS };
+ {"???????","????????","????????","??????","??????","?????","?????", NullS };
 static TYPELIB my_locale_typelib_month_names_ar_SY = 
  { array_elements(my_locale_month_names_ar_SY)-1, "", my_locale_month_names_ar_SY, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ar_SY = 
@@ -246,13 +246,13 @@ MY_LOCALE my_locale_ar_SY
 
 /***** LOCALE BEGIN be_BY: Belarusian - Belarus *****/
 static const char *my_locale_month_names_be_BY[13] = 
- {"Студзень","Люты","Сакавік","Красавік","Травень","Чэрвень","Ліпень","Жнівень","Верасень","Кастрычнік","Лістапад","Снежань", NullS };
+ {"�����է٧֧ߧ�","������","���ѧܧѧ�?��","����ѧ�ѧ�?��","����ѧӧ֧ߧ�","�����ӧ֧ߧ�","��?��֧ߧ�","����?�ӧ֧ߧ�","���֧�ѧ�֧ߧ�","���ѧ�������?��","��?���ѧ�ѧ�","���ߧ֧اѧߧ�", NullS };
 static const char *my_locale_ab_month_names_be_BY[13] = 
- {"Стд","Лют","Сак","Крс","Тра","Чэр","Ліп","Жнв","Врс","Кст","Ліс","Снж", NullS };
+ {"�����","�����","���ѧ�","�����","�����","�����","��?��","���ߧ�","�����","�����","��?��","���ߧ�", NullS };
 static const char *my_locale_day_names_be_BY[8] = 
- {"Панядзелак","Аўторак","Серада","Чацвер","Пятніца","Субота","Нядзеля", NullS };
+ {"���ѧߧ�է٧֧ݧѧ�","��?����ѧ�","���֧�ѧէ�","���ѧ�ӧ֧�","������?���","����ҧ���","����է٧֧ݧ�", NullS };
 static const char *my_locale_ab_day_names_be_BY[8] = 
- {"Пан","Аўт","Срд","Чцв","Пят","Суб","Няд", NullS };
+ {"���ѧ�","��?��","�����","�����","�����","�����","�����", NullS };
 static TYPELIB my_locale_typelib_month_names_be_BY = 
  { array_elements(my_locale_month_names_be_BY)-1, "", my_locale_month_names_be_BY, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_be_BY = 
@@ -282,13 +282,13 @@ MY_LOCALE my_locale_be_BY
 
 /***** LOCALE BEGIN bg_BG: Bulgarian - Bulgaria *****/
 static const char *my_locale_month_names_bg_BG[13] = 
- {"януари","февруари","март","април","май","юни","юли","август","септември","октомври","ноември","декември", NullS };
+ {"��ߧ�ѧ��","��֧ӧ��ѧ��","�ާѧ��","�ѧ��ڧ�","�ާѧ�","��ߧ�","��ݧ�","�ѧӧԧ���","��֧��֧ާӧ��","��ܧ��ާӧ��","�ߧ�֧ާӧ��","�է֧ܧ֧ާӧ��", NullS };
 static const char *my_locale_ab_month_names_bg_BG[13] = 
- {"яну","фев","мар","апр","май","юни","юли","авг","сеп","окт","ное","дек", NullS };
+ {"��ߧ�","��֧�","�ާѧ�","�ѧ��","�ާѧ�","��ߧ�","��ݧ�","�ѧӧ�","��֧�","��ܧ�","�ߧ��","�է֧�", NullS };
 static const char *my_locale_day_names_bg_BG[8] = 
- {"понеделник","вторник","сряда","четвъртък","петък","събота","неделя", NullS };
+ {"���ߧ֧է֧ݧߧڧ�","�ӧ���ߧڧ�","����է�","��֧�ӧ�����","��֧���","���ҧ���","�ߧ֧է֧ݧ�", NullS };
 static const char *my_locale_ab_day_names_bg_BG[8] = 
- {"пн","вт","ср","чт","пт","сб","нд", NullS };
+ {"���","�ӧ�","���","���","���","���","�ߧ�", NullS };
 static TYPELIB my_locale_typelib_month_names_bg_BG = 
  { array_elements(my_locale_month_names_bg_BG)-1, "", my_locale_month_names_bg_BG, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_bg_BG = 
@@ -318,7 +318,7 @@ MY_LOCALE my_locale_bg_BG
 
 /***** LOCALE BEGIN ca_ES: Catalan - Catalan *****/
 static const char *my_locale_month_names_ca_ES[13] = 
- {"gener","febrer","març","abril","maig","juny","juliol","agost","setembre","octubre","novembre","desembre", NullS };
+ {"gener","febrer","mar?","abril","maig","juny","juliol","agost","setembre","octubre","novembre","desembre", NullS };
 static const char *my_locale_ab_month_names_ca_ES[13] = 
  {"gen","feb","mar","abr","mai","jun","jul","ago","set","oct","nov","des", NullS };
 static const char *my_locale_day_names_ca_ES[8] = 
@@ -354,13 +354,13 @@ MY_LOCALE my_locale_ca_ES
 
 /***** LOCALE BEGIN cs_CZ: Czech - Czech Republic *****/
 static const char *my_locale_month_names_cs_CZ[13] = 
- {"leden","únor","březen","duben","květen","červen","červenec","srpen","září","říjen","listopad","prosinec", NullS };
+ {"leden","��nor","b?ezen","duben","kv��ten","?erven","?ervenec","srpen","z��?��","?��jen","listopad","prosinec", NullS };
 static const char *my_locale_ab_month_names_cs_CZ[13] = 
- {"led","úno","bře","dub","kvě","čen","čec","srp","zář","říj","lis","pro", NullS };
+ {"led","��no","b?e","dub","kv��","?en","?ec","srp","z��?","?��j","lis","pro", NullS };
 static const char *my_locale_day_names_cs_CZ[8] = 
- {"Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota","Neděle", NullS };
+ {"Pond��l��","��tery","St?eda","?tvrtek","P��tek","Sobota","Ned��le", NullS };
 static const char *my_locale_ab_day_names_cs_CZ[8] = 
- {"Po","Út","St","Čt","Pá","So","Ne", NullS };
+ {"Po","��t","St","?t","P��","So","Ne", NullS };
 static TYPELIB my_locale_typelib_month_names_cs_CZ = 
  { array_elements(my_locale_month_names_cs_CZ)-1, "", my_locale_month_names_cs_CZ, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_cs_CZ = 
@@ -394,9 +394,9 @@ static const char *my_locale_month_names_da_DK[13] =
 static const char *my_locale_ab_month_names_da_DK[13] = 
  {"jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec", NullS };
 static const char *my_locale_day_names_da_DK[8] = 
- {"mandag","tirsdag","onsdag","torsdag","fredag","lørdag","søndag", NullS };
+ {"mandag","tirsdag","onsdag","torsdag","fredag","l?rdag","s?ndag", NullS };
 static const char *my_locale_ab_day_names_da_DK[8] = 
- {"man","tir","ons","tor","fre","lør","søn", NullS };
+ {"man","tir","ons","tor","fre","l?r","s?n", NullS };
 static TYPELIB my_locale_typelib_month_names_da_DK = 
  { array_elements(my_locale_month_names_da_DK)-1, "", my_locale_month_names_da_DK, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_da_DK = 
@@ -426,9 +426,9 @@ MY_LOCALE my_locale_da_DK
 
 /***** LOCALE BEGIN de_AT: German - Austria *****/
 static const char *my_locale_month_names_de_AT[13] = 
- {"Jänner","Feber","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember", NullS };
+ {"J?nner","Feber","M?rz","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember", NullS };
 static const char *my_locale_ab_month_names_de_AT[13] = 
- {"Jän","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez", NullS };
+ {"J?n","Feb","M?r","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez", NullS };
 static const char *my_locale_day_names_de_AT[8] = 
  {"Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag", NullS };
 static const char *my_locale_ab_day_names_de_AT[8] = 
@@ -462,9 +462,9 @@ MY_LOCALE my_locale_de_AT
 
 /***** LOCALE BEGIN de_DE: German - Germany *****/
 static const char *my_locale_month_names_de_DE[13] = 
- {"Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember", NullS };
+ {"Januar","Februar","M?rz","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember", NullS };
 static const char *my_locale_ab_month_names_de_DE[13] = 
- {"Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez", NullS };
+ {"Jan","Feb","M?r","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez", NullS };
 static const char *my_locale_day_names_de_DE[8] = 
  {"Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag", NullS };
 static const char *my_locale_ab_day_names_de_DE[8] = 
@@ -538,9 +538,9 @@ static const char *my_locale_month_names_es_ES[13] =
 static const char *my_locale_ab_month_names_es_ES[13] = 
  {"ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic", NullS };
 static const char *my_locale_day_names_es_ES[8] = 
- {"lunes","martes","miércoles","jueves","viernes","sábado","domingo", NullS };
+ {"lunes","martes","mi��rcoles","jueves","viernes","s��bado","domingo", NullS };
 static const char *my_locale_ab_day_names_es_ES[8] = 
- {"lun","mar","mié","jue","vie","sáb","dom", NullS };
+ {"lun","mar","mi��","jue","vie","s��b","dom", NullS };
 static TYPELIB my_locale_typelib_month_names_es_ES = 
  { array_elements(my_locale_month_names_es_ES)-1, "", my_locale_month_names_es_ES, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_es_ES = 
@@ -570,11 +570,11 @@ MY_LOCALE my_locale_es_ES
 
 /***** LOCALE BEGIN et_EE: Estonian - Estonia *****/
 static const char *my_locale_month_names_et_EE[13] = 
- {"jaanuar","veebruar","märts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember", NullS };
+ {"jaanuar","veebruar","m?rts","aprill","mai","juuni","juuli","august","september","oktoober","november","detsember", NullS };
 static const char *my_locale_ab_month_names_et_EE[13] = 
- {"jaan ","veebr","märts","apr  ","mai  ","juuni","juuli","aug  ","sept ","okt  ","nov  ","dets ", NullS };
+ {"jaan ","veebr","m?rts","apr  ","mai  ","juuni","juuli","aug  ","sept ","okt  ","nov  ","dets ", NullS };
 static const char *my_locale_day_names_et_EE[8] = 
- {"esmaspäev","teisipäev","kolmapäev","neljapäev","reede","laupäev","pühapäev", NullS };
+ {"esmasp?ev","teisip?ev","kolmap?ev","neljap?ev","reede","laup?ev","p��hap?ev", NullS };
 static const char *my_locale_ab_day_names_et_EE[8] = 
  {"E","T","K","N","R","L","P", NullS };
 static TYPELIB my_locale_typelib_month_names_et_EE = 
@@ -642,9 +642,9 @@ MY_LOCALE my_locale_eu_ES
 
 /***** LOCALE BEGIN fi_FI: Finnish - Finland *****/
 static const char *my_locale_month_names_fi_FI[13] = 
- {"tammikuu","helmikuu","maaliskuu","huhtikuu","toukokuu","kesäkuu","heinäkuu","elokuu","syyskuu","lokakuu","marraskuu","joulukuu", NullS };
+ {"tammikuu","helmikuu","maaliskuu","huhtikuu","toukokuu","kes?kuu","hein?kuu","elokuu","syyskuu","lokakuu","marraskuu","joulukuu", NullS };
 static const char *my_locale_ab_month_names_fi_FI[13] = 
- {"tammi ","helmi ","maalis","huhti ","touko ","kesä  ","heinä ","elo   ","syys  ","loka  ","marras","joulu ", NullS };
+ {"tammi?","helmi?","maalis","huhti?","touko?","kes???","hein??","elo???","syys??","loka??","marras","joulu?", NullS };
 static const char *my_locale_day_names_fi_FI[8] = 
  {"maanantai","tiistai","keskiviikko","torstai","perjantai","lauantai","sunnuntai", NullS };
 static const char *my_locale_ab_day_names_fi_FI[8] = 
@@ -678,13 +678,13 @@ MY_LOCALE my_locale_fi_FI
 
 /***** LOCALE BEGIN fo_FO: Faroese - Faroe Islands *****/
 static const char *my_locale_month_names_fo_FO[13] = 
- {"januar","februar","mars","apríl","mai","juni","juli","august","september","oktober","november","desember", NullS };
+ {"januar","februar","mars","apr��l","mai","juni","juli","august","september","oktober","november","desember", NullS };
 static const char *my_locale_ab_month_names_fo_FO[13] = 
  {"jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des", NullS };
 static const char *my_locale_day_names_fo_FO[8] = 
- {"mánadagur","týsdagur","mikudagur","hósdagur","fríggjadagur","leygardagur","sunnudagur", NullS };
+ {"m��nadagur","tysdagur","mikudagur","h��sdagur","fr��ggjadagur","leygardagur","sunnudagur", NullS };
 static const char *my_locale_ab_day_names_fo_FO[8] = 
- {"mán","týs","mik","hós","frí","ley","sun", NullS };
+ {"m��n","tys","mik","h��s","fr��","ley","sun", NullS };
 static TYPELIB my_locale_typelib_month_names_fo_FO = 
  { array_elements(my_locale_month_names_fo_FO)-1, "", my_locale_month_names_fo_FO, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_fo_FO = 
@@ -714,9 +714,9 @@ MY_LOCALE my_locale_fo_FO
 
 /***** LOCALE BEGIN fr_FR: French - France *****/
 static const char *my_locale_month_names_fr_FR[13] = 
- {"janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre", NullS };
+ {"janvier","f��vrier","mars","avril","mai","juin","juillet","ao?t","septembre","octobre","novembre","d��cembre", NullS };
 static const char *my_locale_ab_month_names_fr_FR[13] = 
- {"jan","fév","mar","avr","mai","jun","jui","aoû","sep","oct","nov","déc", NullS };
+ {"jan","f��v","mar","avr","mai","jun","jui","ao?","sep","oct","nov","d��c", NullS };
 static const char *my_locale_day_names_fr_FR[8] = 
  {"lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche", NullS };
 static const char *my_locale_ab_day_names_fr_FR[8] = 
@@ -750,13 +750,13 @@ MY_LOCALE my_locale_fr_FR
 
 /***** LOCALE BEGIN gl_ES: Galician - Galician *****/
 static const char *my_locale_month_names_gl_ES[13] = 
- {"Xaneiro","Febreiro","Marzo","Abril","Maio","Xuño","Xullo","Agosto","Setembro","Outubro","Novembro","Decembro", NullS };
+ {"Xaneiro","Febreiro","Marzo","Abril","Maio","Xu?o","Xullo","Agosto","Setembro","Outubro","Novembro","Decembro", NullS };
 static const char *my_locale_ab_month_names_gl_ES[13] = 
- {"Xan","Feb","Mar","Abr","Mai","Xuñ","Xul","Ago","Set","Out","Nov","Dec", NullS };
+ {"Xan","Feb","Mar","Abr","Mai","Xu?","Xul","Ago","Set","Out","Nov","Dec", NullS };
 static const char *my_locale_day_names_gl_ES[8] = 
- {"Luns","Martes","Mércores","Xoves","Venres","Sábado","Domingo", NullS };
+ {"Luns","Martes","M��rcores","Xoves","Venres","S��bado","Domingo", NullS };
 static const char *my_locale_ab_day_names_gl_ES[8] = 
- {"Lun","Mar","Mér","Xov","Ven","Sáb","Dom", NullS };
+ {"Lun","Mar","M��r","Xov","Ven","S��b","Dom", NullS };
 static TYPELIB my_locale_typelib_month_names_gl_ES = 
  { array_elements(my_locale_month_names_gl_ES)-1, "", my_locale_month_names_gl_ES, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_gl_ES = 
@@ -786,13 +786,13 @@ MY_LOCALE my_locale_gl_ES
 
 /***** LOCALE BEGIN gu_IN: Gujarati - India *****/
 static const char *my_locale_month_names_gu_IN[13] = 
- {"જાન્યુઆરી","ફેબ્રુઆરી","માર્ચ","એપ્રિલ","મે","જુન","જુલાઇ","ઓગસ્ટ","સેપ્ટેમ્બર","ઓક્ટોબર","નવેમ્બર","ડિસેમ્બર", NullS };
+ {"?????????","?????????","?????","??????","??","???","?????","?????","??????????","???????","???????","????????", NullS };
 static const char *my_locale_ab_month_names_gu_IN[13] = 
- {"જાન","ફેબ","માર","એપ્ર","મે","જુન","જુલ","ઓગ","સેપ્ટ","ઓક્ટ","નોવ","ડિસ", NullS };
+ {"???","???","???","????","??","???","???","??","?????","????","???","???", NullS };
 static const char *my_locale_day_names_gu_IN[8] = 
- {"સોમવાર","મન્ગળવાર","બુધવાર","ગુરુવાર","શુક્રવાર","શનિવાર","રવિવાર", NullS };
+ {"??????","????????","??????","???????","????????","??????","??????", NullS };
 static const char *my_locale_ab_day_names_gu_IN[8] = 
- {"સોમ","મન્ગળ","બુધ","ગુરુ","શુક્ર","શનિ","રવિ", NullS };
+ {"???","?????","???","????","?????","???","???", NullS };
 static TYPELIB my_locale_typelib_month_names_gu_IN = 
  { array_elements(my_locale_month_names_gu_IN)-1, "", my_locale_month_names_gu_IN, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_gu_IN = 
@@ -822,13 +822,13 @@ MY_LOCALE my_locale_gu_IN
 
 /***** LOCALE BEGIN he_IL: Hebrew - Israel *****/
 static const char *my_locale_month_names_he_IL[13] = 
- {"ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר", NullS };
+ {"?????","??????","???","?????","???","????","????","??????","??????","???????","??????","?????", NullS };
 static const char *my_locale_ab_month_names_he_IL[13] = 
- {"ינו","פבר","מרץ","אפר","מאי","יונ","יול","אוג","ספט","אוק","נוב","דצמ", NullS };
+ {"???","???","???","???","???","???","???","???","???","???","???","???", NullS };
 static const char *my_locale_day_names_he_IL[8] = 
- {"שני","שלישי","רביעי","חמישי","שישי","שבת","ראשון", NullS };
+ {"???","?????","?????","?????","????","???","?????", NullS };
 static const char *my_locale_ab_day_names_he_IL[8] = 
- {"ב'","ג'","ד'","ה'","ו'","ש'","א'", NullS };
+ {"?'","?'","?'","?'","?'","?'","?'", NullS };
 static TYPELIB my_locale_typelib_month_names_he_IL = 
  { array_elements(my_locale_month_names_he_IL)-1, "", my_locale_month_names_he_IL, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_he_IL = 
@@ -858,13 +858,13 @@ MY_LOCALE my_locale_he_IL
 
 /***** LOCALE BEGIN hi_IN: Hindi - India *****/
 static const char *my_locale_month_names_hi_IN[13] = 
- {"जनवरी","फ़रवरी","मार्च","अप्रेल","मई","जून","जुलाई","अगस्त","सितम्बर","अक्टूबर","नवम्बर","दिसम्बर", NullS };
+ {"?????","??????","?????","??????","??","???","?????","?????","???????","???????","??????","???????", NullS };
 static const char *my_locale_ab_month_names_hi_IN[13] = 
- {"जनवरी","फ़रवरी","मार्च","अप्रेल","मई","जून","जुलाई","अगस्त","सितम्बर","अक्टूबर","नवम्बर","दिसम्बर", NullS };
+ {"?????","??????","?????","??????","??","???","?????","?????","???????","???????","??????","???????", NullS };
 static const char *my_locale_day_names_hi_IN[8] = 
- {"सोमवार ","मंगलवार ","बुधवार ","गुरुवार ","शुक्रवार ","शनिवार ","रविवार ", NullS };
+ {"?????? ","??????? ","?????? ","??????? ","???????? ","?????? ","?????? ", NullS };
 static const char *my_locale_ab_day_names_hi_IN[8] = 
- {"सोम ","मंगल ","बुध ","गुरु ","शुक्र ","शनि ","रवि ", NullS };
+ {"??? ","???? ","??? ","???? ","????? ","??? ","??? ", NullS };
 static TYPELIB my_locale_typelib_month_names_hi_IN = 
  { array_elements(my_locale_month_names_hi_IN)-1, "", my_locale_month_names_hi_IN, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_hi_IN = 
@@ -894,13 +894,13 @@ MY_LOCALE my_locale_hi_IN
 
 /***** LOCALE BEGIN hr_HR: Croatian - Croatia *****/
 static const char *my_locale_month_names_hr_HR[13] = 
- {"Siječanj","Veljača","Ožujak","Travanj","Svibanj","Lipanj","Srpanj","Kolovoz","Rujan","Listopad","Studeni","Prosinac", NullS };
+ {"Sije?anj","Velja?a","O?ujak","Travanj","Svibanj","Lipanj","Srpanj","Kolovoz","Rujan","Listopad","Studeni","Prosinac", NullS };
 static const char *my_locale_ab_month_names_hr_HR[13] = 
- {"Sij","Vel","Ožu","Tra","Svi","Lip","Srp","Kol","Ruj","Lis","Stu","Pro", NullS };
+ {"Sij","Vel","O?u","Tra","Svi","Lip","Srp","Kol","Ruj","Lis","Stu","Pro", NullS };
 static const char *my_locale_day_names_hr_HR[8] = 
- {"Ponedjeljak","Utorak","Srijeda","Četvrtak","Petak","Subota","Nedjelja", NullS };
+ {"Ponedjeljak","Utorak","Srijeda","?etvrtak","Petak","Subota","Nedjelja", NullS };
 static const char *my_locale_ab_day_names_hr_HR[8] = 
- {"Pon","Uto","Sri","Čet","Pet","Sub","Ned", NullS };
+ {"Pon","Uto","Sri","?et","Pet","Sub","Ned", NullS };
 static TYPELIB my_locale_typelib_month_names_hr_HR = 
  { array_elements(my_locale_month_names_hr_HR)-1, "", my_locale_month_names_hr_HR, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_hr_HR = 
@@ -930,11 +930,11 @@ MY_LOCALE my_locale_hr_HR
 
 /***** LOCALE BEGIN hu_HU: Hungarian - Hungary *****/
 static const char *my_locale_month_names_hu_HU[13] = 
- {"január","február","március","április","május","június","július","augusztus","szeptember","október","november","december", NullS };
+ {"janu��r","febru��r","m��rcius","��prilis","m��jus","j��nius","j��lius","augusztus","szeptember","okt��ber","november","december", NullS };
 static const char *my_locale_ab_month_names_hu_HU[13] = 
- {"jan","feb","már","ápr","máj","jún","júl","aug","sze","okt","nov","dec", NullS };
+ {"jan","feb","m��r","��pr","m��j","j��n","j��l","aug","sze","okt","nov","dec", NullS };
 static const char *my_locale_day_names_hu_HU[8] = 
- {"hétfő","kedd","szerda","csütörtök","péntek","szombat","vasárnap", NullS };
+ {"h��tf?","kedd","szerda","cs��t?rt?k","p��ntek","szombat","vas��rnap", NullS };
 static const char *my_locale_ab_day_names_hu_HU[8] = 
  {"h","k","sze","cs","p","szo","v", NullS };
 static TYPELIB my_locale_typelib_month_names_hu_HU = 
@@ -1002,13 +1002,13 @@ MY_LOCALE my_locale_id_ID
 
 /***** LOCALE BEGIN is_IS: Icelandic - Iceland *****/
 static const char *my_locale_month_names_is_IS[13] = 
- {"janúar","febrúar","mars","apríl","maí","júní","júlí","ágúst","september","október","nóvember","desember", NullS };
+ {"jan��ar","febr��ar","mars","apr��l","ma��","j��n��","j��l��","��g��st","september","okt��ber","n��vember","desember", NullS };
 static const char *my_locale_ab_month_names_is_IS[13] = 
- {"jan","feb","mar","apr","maí","jún","júl","ágú","sep","okt","nóv","des", NullS };
+ {"jan","feb","mar","apr","ma��","j��n","j��l","��g��","sep","okt","n��v","des", NullS };
 static const char *my_locale_day_names_is_IS[8] = 
- {"mánudagur","þriðjudagur","miðvikudagur","fimmtudagur","föstudagur","laugardagur","sunnudagur", NullS };
+ {"m��nudagur","triejudagur","mievikudagur","fimmtudagur","f?studagur","laugardagur","sunnudagur", NullS };
 static const char *my_locale_ab_day_names_is_IS[8] = 
- {"mán","þri","mið","fim","fös","lau","sun", NullS };
+ {"m��n","tri","mie","fim","f?s","lau","sun", NullS };
 static TYPELIB my_locale_typelib_month_names_is_IS = 
  { array_elements(my_locale_month_names_is_IS)-1, "", my_locale_month_names_is_IS, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_is_IS = 
@@ -1042,7 +1042,7 @@ static const char *my_locale_month_names_it_CH[13] =
 static const char *my_locale_ab_month_names_it_CH[13] = 
  {"gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic", NullS };
 static const char *my_locale_day_names_it_CH[8] = 
- {"lunedì","martedì","mercoledì","giovedì","venerdì","sabato","domenica", NullS };
+ {"luned��","marted��","mercoled��","gioved��","venerd��","sabato","domenica", NullS };
 static const char *my_locale_ab_day_names_it_CH[8] = 
  {"lun","mar","mer","gio","ven","sab","dom", NullS };
 static TYPELIB my_locale_typelib_month_names_it_CH = 
@@ -1074,13 +1074,13 @@ MY_LOCALE my_locale_it_CH
 
 /***** LOCALE BEGIN ja_JP: Japanese - Japan *****/
 static const char *my_locale_month_names_ja_JP[13] = 
- {"1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月", NullS };
+ {"1��","2��","3��","4��","5��","6��","7��","8��","9��","10��","11��","12��", NullS };
 static const char *my_locale_ab_month_names_ja_JP[13] = 
- {" 1月"," 2月"," 3月"," 4月"," 5月"," 6月"," 7月"," 8月"," 9月","10月","11月","12月", NullS };
+ {" 1��"," 2��"," 3��"," 4��"," 5��"," 6��"," 7��"," 8��"," 9��","10��","11��","12��", NullS };
 static const char *my_locale_day_names_ja_JP[8] = 
- {"月曜日","火曜日","水曜日","木曜日","金曜日","土曜日","日曜日", NullS };
+ {"������","������","ˮ����","ľ����","������","������","������", NullS };
 static const char *my_locale_ab_day_names_ja_JP[8] = 
- {"月","火","水","木","金","土","日", NullS };
+ {"��","��","ˮ","ľ","��","��","��", NullS };
 static TYPELIB my_locale_typelib_month_names_ja_JP = 
  { array_elements(my_locale_month_names_ja_JP)-1, "", my_locale_month_names_ja_JP, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ja_JP = 
@@ -1110,13 +1110,13 @@ MY_LOCALE my_locale_ja_JP
 
 /***** LOCALE BEGIN ko_KR: Korean - Korea *****/
 static const char *my_locale_month_names_ko_KR[13] = 
- {"일월","이월","삼월","사월","오월","유월","칠월","팔월","구월","시월","십일월","십이월", NullS };
+ {"??","??","??","??","??","??","??","??","??","??","???","???", NullS };
 static const char *my_locale_ab_month_names_ko_KR[13] = 
- {" 1월"," 2월"," 3월"," 4월"," 5월"," 6월"," 7월"," 8월"," 9월","10월","11월","12월", NullS };
+ {" 1?"," 2?"," 3?"," 4?"," 5?"," 6?"," 7?"," 8?"," 9?","10?","11?","12?", NullS };
 static const char *my_locale_day_names_ko_KR[8] = 
- {"월요일","화요일","수요일","목요일","금요일","토요일","일요일", NullS };
+ {"???","???","???","???","???","???","???", NullS };
 static const char *my_locale_ab_day_names_ko_KR[8] = 
- {"월","화","수","목","금","토","일", NullS };
+ {"?","?","?","?","?","?","?", NullS };
 static TYPELIB my_locale_typelib_month_names_ko_KR = 
  { array_elements(my_locale_month_names_ko_KR)-1, "", my_locale_month_names_ko_KR, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ko_KR = 
@@ -1146,13 +1146,13 @@ MY_LOCALE my_locale_ko_KR
 
 /***** LOCALE BEGIN lt_LT: Lithuanian - Lithuania *****/
 static const char *my_locale_month_names_lt_LT[13] = 
- {"sausio","vasario","kovo","balandžio","gegužės","birželio","liepos","rugpjūčio","rugsėjo","spalio","lapkričio","gruodžio", NullS };
+ {"sausio","vasario","kovo","baland?io","gegu??s","bir?elio","liepos","rugpj��?io","rugs?jo","spalio","lapkri?io","gruod?io", NullS };
 static const char *my_locale_ab_month_names_lt_LT[13] = 
  {"Sau","Vas","Kov","Bal","Geg","Bir","Lie","Rgp","Rgs","Spa","Lap","Grd", NullS };
 static const char *my_locale_day_names_lt_LT[8] = 
- {"Pirmadienis","Antradienis","Trečiadienis","Ketvirtadienis","Penktadienis","Šeštadienis","Sekmadienis", NullS };
+ {"Pirmadienis","Antradienis","Tre?iadienis","Ketvirtadienis","Penktadienis","?e?tadienis","Sekmadienis", NullS };
 static const char *my_locale_ab_day_names_lt_LT[8] = 
- {"Pr","An","Tr","Kt","Pn","Št","Sk", NullS };
+ {"Pr","An","Tr","Kt","Pn","?t","Sk", NullS };
 static TYPELIB my_locale_typelib_month_names_lt_LT = 
  { array_elements(my_locale_month_names_lt_LT)-1, "", my_locale_month_names_lt_LT, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_lt_LT = 
@@ -1182,13 +1182,13 @@ MY_LOCALE my_locale_lt_LT
 
 /***** LOCALE BEGIN lv_LV: Latvian - Latvia *****/
 static const char *my_locale_month_names_lv_LV[13] = 
- {"janvāris","februāris","marts","aprīlis","maijs","jūnijs","jūlijs","augusts","septembris","oktobris","novembris","decembris", NullS };
+ {"janv��ris","febru��ris","marts","apr��lis","maijs","j��nijs","j��lijs","augusts","septembris","oktobris","novembris","decembris", NullS };
 static const char *my_locale_ab_month_names_lv_LV[13] = 
- {"jan","feb","mar","apr","mai","jūn","jūl","aug","sep","okt","nov","dec", NullS };
+ {"jan","feb","mar","apr","mai","j��n","j��l","aug","sep","okt","nov","dec", NullS };
 static const char *my_locale_day_names_lv_LV[8] = 
- {"pirmdiena","otrdiena","trešdiena","ceturtdiena","piektdiena","sestdiena","svētdiena", NullS };
+ {"pirmdiena","otrdiena","tre?diena","ceturtdiena","piektdiena","sestdiena","sv��tdiena", NullS };
 static const char *my_locale_ab_day_names_lv_LV[8] = 
- {"P ","O ","T ","C ","Pk","S ","Sv", NullS };
+ {"P?","O?","T?","C?","Pk","S?","Sv", NullS };
 static TYPELIB my_locale_typelib_month_names_lv_LV = 
  { array_elements(my_locale_month_names_lv_LV)-1, "", my_locale_month_names_lv_LV, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_lv_LV = 
@@ -1218,13 +1218,13 @@ MY_LOCALE my_locale_lv_LV
 
 /***** LOCALE BEGIN mk_MK: Macedonian - FYROM *****/
 static const char *my_locale_month_names_mk_MK[13] = 
- {"јануари","февруари","март","април","мај","јуни","јули","август","септември","октомври","ноември","декември", NullS };
+ {"?�ѧߧ�ѧ��","��֧ӧ��ѧ��","�ާѧ��","�ѧ��ڧ�","�ާ�?","?��ߧ�","?��ݧ�","�ѧӧԧ���","��֧��֧ާӧ��","��ܧ��ާӧ��","�ߧ�֧ާӧ��","�է֧ܧ֧ާӧ��", NullS };
 static const char *my_locale_ab_month_names_mk_MK[13] = 
- {"јан","фев","мар","апр","мај","јун","јул","авг","сеп","окт","ное","дек", NullS };
+ {"?�ѧ�","��֧�","�ާѧ�","�ѧ��","�ާ�?","?���","?���","�ѧӧ�","��֧�","��ܧ�","�ߧ��","�է֧�", NullS };
 static const char *my_locale_day_names_mk_MK[8] = 
- {"понеделник","вторник","среда","четврток","петок","сабота","недела", NullS };
+ {"���ߧ֧է֧ݧߧڧ�","�ӧ���ߧڧ�","���֧է�","��֧�ӧ����","��֧���","��ѧҧ���","�ߧ֧է֧ݧ�", NullS };
 static const char *my_locale_ab_day_names_mk_MK[8] = 
- {"пон","вто","сре","чет","пет","саб","нед", NullS };
+ {"����","�ӧ��","����","��֧�","��֧�","��ѧ�","�ߧ֧�", NullS };
 static TYPELIB my_locale_typelib_month_names_mk_MK = 
  { array_elements(my_locale_month_names_mk_MK)-1, "", my_locale_month_names_mk_MK, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_mk_MK = 
@@ -1254,13 +1254,13 @@ MY_LOCALE my_locale_mk_MK
 
 /***** LOCALE BEGIN mn_MN: Mongolia - Mongolian *****/
 static const char *my_locale_month_names_mn_MN[13] = 
- {"Нэгдүгээр сар","Хоёрдугаар сар","Гуравдугаар сар","Дөрөвдүгээр сар","Тавдугаар сар","Зургаадугар сар","Долоодугаар сар","Наймдугаар сар","Есдүгээр сар","Аравдугаар сар","Арваннэгдүгээр сар","Арванхоёрдгаар сар", NullS };
+ {"����ԧ�?�ԧ��� ��ѧ�","����ק�է�ԧѧѧ� ��ѧ�","�����ѧӧէ�ԧѧѧ� ��ѧ�","��?��?�ӧ�?�ԧ��� ��ѧ�","���ѧӧէ�ԧѧѧ� ��ѧ�","�����ԧѧѧէ�ԧѧ� ��ѧ�","����ݧ��է�ԧѧѧ� ��ѧ�","���ѧۧާէ�ԧѧѧ� ��ѧ�","�����?�ԧ��� ��ѧ�","����ѧӧէ�ԧѧѧ� ��ѧ�","����ӧѧߧߧ�ԧ�?�ԧ��� ��ѧ�","����ӧѧߧ��ק�էԧѧѧ� ��ѧ�", NullS };
 static const char *my_locale_ab_month_names_mn_MN[13] = 
- {"1-р","2-р","3-р","4-р","5-р","6-р","7-р","8-р","9-р","10-р","11-р","12-р", NullS };
+ {"1-��","2-��","3-��","4-��","5-��","6-��","7-��","8-��","9-��","10-��","11-��","12-��", NullS };
 static const char *my_locale_day_names_mn_MN[8] = 
- {"Даваа","Мягмар","Лхагва","Пүрэв","Баасан","Бямба","Ням", NullS };
+ {"���ѧӧѧ�","����ԧާѧ�","����ѧԧӧ�","��?����","���ѧѧ�ѧ�","����ާҧ�","�����", NullS };
 static const char *my_locale_ab_day_names_mn_MN[8] = 
- {"Да","Мя","Лх","Пү","Ба","Бя","Ня", NullS };
+ {"����","����","����","��?","����","����","����", NullS };
 static TYPELIB my_locale_typelib_month_names_mn_MN = 
  { array_elements(my_locale_month_names_mn_MN)-1, "", my_locale_month_names_mn_MN, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_mn_MN = 
@@ -1330,9 +1330,9 @@ static const char *my_locale_month_names_nb_NO[13] =
 static const char *my_locale_ab_month_names_nb_NO[13] = 
  {"jan","feb","mar","apr","mai","jun","jul","aug","sep","okt","nov","des", NullS };
 static const char *my_locale_day_names_nb_NO[8] = 
- {"mandag","tirsdag","onsdag","torsdag","fredag","lørdag","søndag", NullS };
+ {"mandag","tirsdag","onsdag","torsdag","fredag","l?rdag","s?ndag", NullS };
 static const char *my_locale_ab_day_names_nb_NO[8] = 
- {"man","tir","ons","tor","fre","lør","søn", NullS };
+ {"man","tir","ons","tor","fre","l?r","s?n", NullS };
 static TYPELIB my_locale_typelib_month_names_nb_NO = 
  { array_elements(my_locale_month_names_nb_NO)-1, "", my_locale_month_names_nb_NO, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_nb_NO = 
@@ -1398,13 +1398,13 @@ MY_LOCALE my_locale_nl_NL
 
 /***** LOCALE BEGIN pl_PL: Polish - Poland *****/
 static const char *my_locale_month_names_pl_PL[13] = 
- {"styczeń","luty","marzec","kwiecień","maj","czerwiec","lipiec","sierpień","wrzesień","październik","listopad","grudzień", NullS };
+ {"stycze��","luty","marzec","kwiecie��","maj","czerwiec","lipiec","sierpie��","wrzesie��","pa?dziernik","listopad","grudzie��", NullS };
 static const char *my_locale_ab_month_names_pl_PL[13] = 
- {"sty","lut","mar","kwi","maj","cze","lip","sie","wrz","paź","lis","gru", NullS };
+ {"sty","lut","mar","kwi","maj","cze","lip","sie","wrz","pa?","lis","gru", NullS };
 static const char *my_locale_day_names_pl_PL[8] = 
- {"poniedziałek","wtorek","środa","czwartek","piątek","sobota","niedziela", NullS };
+ {"poniedzia?ek","wtorek","?roda","czwartek","pi?tek","sobota","niedziela", NullS };
 static const char *my_locale_ab_day_names_pl_PL[8] = 
- {"pon","wto","śro","czw","pią","sob","nie", NullS };
+ {"pon","wto","?ro","czw","pi?","sob","nie", NullS };
 static TYPELIB my_locale_typelib_month_names_pl_PL = 
  { array_elements(my_locale_month_names_pl_PL)-1, "", my_locale_month_names_pl_PL, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_pl_PL = 
@@ -1434,13 +1434,13 @@ MY_LOCALE my_locale_pl_PL
 
 /***** LOCALE BEGIN pt_BR: Portugese - Brazil *****/
 static const char *my_locale_month_names_pt_BR[13] = 
- {"janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro", NullS };
+ {"janeiro","fevereiro","mar?o","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro", NullS };
 static const char *my_locale_ab_month_names_pt_BR[13] = 
  {"Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez", NullS };
 static const char *my_locale_day_names_pt_BR[8] = 
- {"segunda","terça","quarta","quinta","sexta","sábado","domingo", NullS };
+ {"segunda","ter?a","quarta","quinta","sexta","s��bado","domingo", NullS };
 static const char *my_locale_ab_day_names_pt_BR[8] = 
- {"Seg","Ter","Qua","Qui","Sex","Sáb","Dom", NullS };
+ {"Seg","Ter","Qua","Qui","Sex","S��b","Dom", NullS };
 static TYPELIB my_locale_typelib_month_names_pt_BR = 
  { array_elements(my_locale_month_names_pt_BR)-1, "", my_locale_month_names_pt_BR, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_pt_BR = 
@@ -1470,13 +1470,13 @@ MY_LOCALE my_locale_pt_BR
 
 /***** LOCALE BEGIN pt_PT: Portugese - Portugal *****/
 static const char *my_locale_month_names_pt_PT[13] = 
- {"Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro", NullS };
+ {"Janeiro","Fevereiro","Mar?o","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro", NullS };
 static const char *my_locale_ab_month_names_pt_PT[13] = 
  {"Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez", NullS };
 static const char *my_locale_day_names_pt_PT[8] = 
- {"Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo", NullS };
+ {"Segunda","Ter?a","Quarta","Quinta","Sexta","S��bado","Domingo", NullS };
 static const char *my_locale_ab_day_names_pt_PT[8] = 
- {"Seg","Ter","Qua","Qui","Sex","Sáb","Dom", NullS };
+ {"Seg","Ter","Qua","Qui","Sex","S��b","Dom", NullS };
 static TYPELIB my_locale_typelib_month_names_pt_PT = 
  { array_elements(my_locale_month_names_pt_PT)-1, "", my_locale_month_names_pt_PT, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_pt_PT = 
@@ -1510,9 +1510,9 @@ static const char *my_locale_month_names_ro_RO[13] =
 static const char *my_locale_ab_month_names_ro_RO[13] = 
  {"ian","feb","mar","apr","mai","iun","iul","aug","sep","oct","nov","dec", NullS };
 static const char *my_locale_day_names_ro_RO[8] = 
- {"Luni","Marţi","Miercuri","Joi","Vineri","Sâmbătă","Duminică", NullS };
+ {"Luni","Mar?i","Miercuri","Joi","Vineri","Samb?t?","Duminic?", NullS };
 static const char *my_locale_ab_day_names_ro_RO[8] = 
- {"Lu","Ma","Mi","Jo","Vi","Sâ","Du", NullS };
+ {"Lu","Ma","Mi","Jo","Vi","Sa","Du", NullS };
 static TYPELIB my_locale_typelib_month_names_ro_RO = 
  { array_elements(my_locale_month_names_ro_RO)-1, "", my_locale_month_names_ro_RO, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ro_RO = 
@@ -1542,13 +1542,13 @@ MY_LOCALE my_locale_ro_RO
 
 /***** LOCALE BEGIN ru_RU: Russian - Russia *****/
 static const char *my_locale_month_names_ru_RU[13] = 
- {"Января","Февраля","Марта","Апреля","Мая","Июня","Июля","Августа","Сентября","Октября","Ноября","Декабря", NullS };
+ {"���ߧӧѧ��","���֧ӧ�ѧݧ�","���ѧ���","�����֧ݧ�","���ѧ�","����ߧ�","����ݧ�","���ӧԧ����","���֧ߧ��ҧ��","���ܧ��ҧ��","�����ҧ��","���֧ܧѧҧ��", NullS };
 static const char *my_locale_ab_month_names_ru_RU[13] = 
- {"Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек", NullS };
+ {"���ߧ�","���֧�","���ѧ�","�����","���ѧ�","�����","�����","���ӧ�","���֧�","���ܧ�","�����","���֧�", NullS };
 static const char *my_locale_day_names_ru_RU[8] = 
- {"Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье", NullS };
+ {"����ߧ֧է֧ݧ�ߧڧ�","������ߧڧ�","����֧է�","���֧�ӧ֧��","�����ߧڧ��","����ҧҧ���","�����ܧ�֧�֧ߧ��", NullS };
 static const char *my_locale_ab_day_names_ru_RU[8] = 
- {"Пнд","Втр","Срд","Чтв","Птн","Сбт","Вск", NullS };
+ {"���ߧ�","�����","�����","�����","�����","���ҧ�","�����", NullS };
 static TYPELIB my_locale_typelib_month_names_ru_RU = 
  { array_elements(my_locale_month_names_ru_RU)-1, "", my_locale_month_names_ru_RU, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ru_RU = 
@@ -1578,13 +1578,13 @@ MY_LOCALE my_locale_ru_RU
 
 /***** LOCALE BEGIN ru_UA: Russian - Ukraine *****/
 static const char *my_locale_month_names_ru_UA[13] = 
- {"Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь", NullS };
+ {"���ߧӧѧ��","���֧ӧ�ѧݧ�","���ѧ��","�����֧ݧ�","���ѧ�","����ߧ�","����ݧ�","���ӧԧ���","���֧ߧ��ҧ��","���ܧ��ҧ��","�����ҧ��","���֧ܧѧҧ��", NullS };
 static const char *my_locale_ab_month_names_ru_UA[13] = 
- {"Янв","Фев","Мар","Апр","Май","Июн","Июл","Авг","Сен","Окт","Ноя","Дек", NullS };
+ {"���ߧ�","���֧�","���ѧ�","�����","���ѧ�","�����","�����","���ӧ�","���֧�","���ܧ�","�����","���֧�", NullS };
 static const char *my_locale_day_names_ru_UA[8] = 
- {"Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье", NullS };
+ {"����ߧ֧է֧ݧ�ߧڧ�","������ߧڧ�","����֧է�","���֧�ӧ֧��","�����ߧڧ��","����ҧҧ���","�����ܧ�֧�֧ߧ��", NullS };
 static const char *my_locale_ab_day_names_ru_UA[8] = 
- {"Пнд","Вто","Срд","Чтв","Птн","Суб","Вск", NullS };
+ {"���ߧ�","�����","�����","�����","�����","�����","�����", NullS };
 static TYPELIB my_locale_typelib_month_names_ru_UA = 
  { array_elements(my_locale_month_names_ru_UA)-1, "", my_locale_month_names_ru_UA, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ru_UA = 
@@ -1614,13 +1614,13 @@ MY_LOCALE my_locale_ru_UA
 
 /***** LOCALE BEGIN sk_SK: Slovak - Slovakia *****/
 static const char *my_locale_month_names_sk_SK[13] = 
- {"január","február","marec","apríl","máj","jún","júl","august","september","október","november","december", NullS };
+ {"janu��r","febru��r","marec","apr��l","m��j","j��n","j��l","august","september","okt��ber","november","december", NullS };
 static const char *my_locale_ab_month_names_sk_SK[13] = 
- {"jan","feb","mar","apr","máj","jún","júl","aug","sep","okt","nov","dec", NullS };
+ {"jan","feb","mar","apr","m��j","j��n","j��l","aug","sep","okt","nov","dec", NullS };
 static const char *my_locale_day_names_sk_SK[8] = 
- {"Pondelok","Utorok","Streda","Štvrtok","Piatok","Sobota","Nedeľa", NullS };
+ {"Pondelok","Utorok","Streda","?tvrtok","Piatok","Sobota","Nede?a", NullS };
 static const char *my_locale_ab_day_names_sk_SK[8] = 
- {"Po","Ut","St","Št","Pi","So","Ne", NullS };
+ {"Po","Ut","St","?t","Pi","So","Ne", NullS };
 static TYPELIB my_locale_typelib_month_names_sk_SK = 
  { array_elements(my_locale_month_names_sk_SK)-1, "", my_locale_month_names_sk_SK, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_sk_SK = 
@@ -1654,9 +1654,9 @@ static const char *my_locale_month_names_sl_SI[13] =
 static const char *my_locale_ab_month_names_sl_SI[13] = 
  {"jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec", NullS };
 static const char *my_locale_day_names_sl_SI[8] = 
- {"ponedeljek","torek","sreda","četrtek","petek","sobota","nedelja", NullS };
+ {"ponedeljek","torek","sreda","?etrtek","petek","sobota","nedelja", NullS };
 static const char *my_locale_ab_day_names_sl_SI[8] = 
- {"pon","tor","sre","čet","pet","sob","ned", NullS };
+ {"pon","tor","sre","?et","pet","sob","ned", NullS };
 static TYPELIB my_locale_typelib_month_names_sl_SI = 
  { array_elements(my_locale_month_names_sl_SI)-1, "", my_locale_month_names_sl_SI, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_sl_SI = 
@@ -1686,13 +1686,13 @@ MY_LOCALE my_locale_sl_SI
 
 /***** LOCALE BEGIN sq_AL: Albanian - Albania *****/
 static const char *my_locale_month_names_sq_AL[13] = 
- {"janar","shkurt","mars","prill","maj","qershor","korrik","gusht","shtator","tetor","nëntor","dhjetor", NullS };
+ {"janar","shkurt","mars","prill","maj","qershor","korrik","gusht","shtator","tetor","n?ntor","dhjetor", NullS };
 static const char *my_locale_ab_month_names_sq_AL[13] = 
- {"Jan","Shk","Mar","Pri","Maj","Qer","Kor","Gsh","Sht","Tet","Nën","Dhj", NullS };
+ {"Jan","Shk","Mar","Pri","Maj","Qer","Kor","Gsh","Sht","Tet","N?n","Dhj", NullS };
 static const char *my_locale_day_names_sq_AL[8] = 
- {"e hënë ","e martë ","e mërkurë ","e enjte ","e premte ","e shtunë ","e diel ", NullS };
+ {"e h?n? ","e mart? ","e m?rkur? ","e enjte ","e premte ","e shtun? ","e diel ", NullS };
 static const char *my_locale_ab_day_names_sq_AL[8] = 
- {"Hën ","Mar ","Mër ","Enj ","Pre ","Sht ","Die ", NullS };
+ {"H?n ","Mar ","M?r ","Enj ","Pre ","Sht ","Die ", NullS };
 static TYPELIB my_locale_typelib_month_names_sq_AL = 
  { array_elements(my_locale_month_names_sq_AL)-1, "", my_locale_month_names_sq_AL, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_sq_AL = 
@@ -1726,9 +1726,9 @@ static const char *my_locale_month_names_sr_RS[13] =
 static const char *my_locale_ab_month_names_sr_RS[13] = 
  {"jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec", NullS };
 static const char *my_locale_day_names_sr_RS[8] = 
- {"ponedeljak","utorak","sreda","četvrtak","petak","subota","nedelja", NullS };
+ {"ponedeljak","utorak","sreda","?etvrtak","petak","subota","nedelja", NullS };
 static const char *my_locale_ab_day_names_sr_RS[8] = 
- {"pon","uto","sre","čet","pet","sub","ned", NullS };
+ {"pon","uto","sre","?et","pet","sub","ned", NullS };
 static TYPELIB my_locale_typelib_month_names_sr_RS = 
  { array_elements(my_locale_month_names_sr_RS)-1, "", my_locale_month_names_sr_RS, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_sr_RS = 
@@ -1780,9 +1780,9 @@ static const char *my_locale_month_names_sv_SE[13] =
 static const char *my_locale_ab_month_names_sv_SE[13] = 
  {"jan","feb","mar","apr","maj","jun","jul","aug","sep","okt","nov","dec", NullS };
 static const char *my_locale_day_names_sv_SE[8] = 
- {"måndag","tisdag","onsdag","torsdag","fredag","lördag","söndag", NullS };
+ {"m?ndag","tisdag","onsdag","torsdag","fredag","l?rdag","s?ndag", NullS };
 static const char *my_locale_ab_day_names_sv_SE[8] = 
- {"mån","tis","ons","tor","fre","lör","sön", NullS };
+ {"m?n","tis","ons","tor","fre","l?r","s?n", NullS };
 static TYPELIB my_locale_typelib_month_names_sv_SE = 
  { array_elements(my_locale_month_names_sv_SE)-1, "", my_locale_month_names_sv_SE, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_sv_SE = 
@@ -1812,13 +1812,13 @@ MY_LOCALE my_locale_sv_SE
 
 /***** LOCALE BEGIN ta_IN: Tamil - India *****/
 static const char *my_locale_month_names_ta_IN[13] = 
- {"ஜனவரி","பெப்ரவரி","மார்ச்","ஏப்ரல்","மே","ஜூன்","ஜூலை","ஆகஸ்ட்","செப்டம்பர்","அக்டோபர்","நவம்பர்","டிசம்பர்r", NullS };
+ {"?????","????????","??????","??????","??","????","????","??????","??????????","????????","???????","????????r", NullS };
 static const char *my_locale_ab_month_names_ta_IN[13] = 
- {"ஜனவரி","பெப்ரவரி","மார்ச்","ஏப்ரல்","மே","ஜூன்","ஜூலை","ஆகஸ்ட்","செப்டம்பர்","அக்டோபர்","நவம்பர்","டிசம்பர்r", NullS };
+ {"?????","????????","??????","??????","??","????","????","??????","??????????","????????","???????","????????r", NullS };
 static const char *my_locale_day_names_ta_IN[8] = 
- {"திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி","ஞாயிறு", NullS };
+ {"???????","????????","?????","???????","??????","???","??????", NullS };
 static const char *my_locale_ab_day_names_ta_IN[8] = 
- {"த","ச","ப","வ","வ","ச","ஞ", NullS };
+ {"?","?","?","?","?","?","?", NullS };
 static TYPELIB my_locale_typelib_month_names_ta_IN = 
  { array_elements(my_locale_month_names_ta_IN)-1, "", my_locale_month_names_ta_IN, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ta_IN = 
@@ -1848,13 +1848,13 @@ MY_LOCALE my_locale_ta_IN
 
 /***** LOCALE BEGIN te_IN: Telugu - India *****/
 static const char *my_locale_month_names_te_IN[13] = 
- {"జనవరి","ఫిబ్రవరి","మార్చి","ఏప్రిల్","మే","జూన్","జూలై","ఆగస్టు","సెప్టెంబర్","అక్టోబర్","నవంబర్","డిసెంబర్", NullS };
+ {"?????","????????","??????","???????","??","????","????","??????","??????????","????????","??????","????????", NullS };
 static const char *my_locale_ab_month_names_te_IN[13] = 
- {"జనవరి","ఫిబ్రవరి","మార్చి","ఏప్రిల్","మే","జూన్","జూలై","ఆగస్టు","సెప్టెంబర్","అక్టోబర్","నవంబర్","డిసెంబర్", NullS };
+ {"?????","????????","??????","???????","??","????","????","??????","??????????","????????","??????","????????", NullS };
 static const char *my_locale_day_names_te_IN[8] = 
- {"సోమవారం","మంగళవారం","బుధవారం","గురువారం","శుక్రవారం","శనివారం","ఆదివారం", NullS };
+ {"???????","????????","???????","????????","?????????","???????","???????", NullS };
 static const char *my_locale_ab_day_names_te_IN[8] = 
- {"సోమ","మంగళ","బుధ","గురు","శుక్ర","శని","ఆది", NullS };
+ {"???","????","???","????","?????","???","???", NullS };
 static TYPELIB my_locale_typelib_month_names_te_IN = 
  { array_elements(my_locale_month_names_te_IN)-1, "", my_locale_month_names_te_IN, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_te_IN = 
@@ -1884,13 +1884,13 @@ MY_LOCALE my_locale_te_IN
 
 /***** LOCALE BEGIN th_TH: Thai - Thailand *****/
 static const char *my_locale_month_names_th_TH[13] = 
- {"มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม", NullS };
+ {"??????","??????????","??????","??????","???????","????????","???????","???????","???????","??????","?????????","???????", NullS };
 static const char *my_locale_ab_month_names_th_TH[13] = 
- {"ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค.", NullS };
+ {"?.?.","?.?.","??.?.","??.?.","?.?.","??.?.","?.?.","?.?.","?.?.","?.?.","?.?.","?.?.", NullS };
 static const char *my_locale_day_names_th_TH[8] = 
- {"จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์","อาทิตย์", NullS };
+ {"??????","??????","???","????????","?????","?????","???????", NullS };
 static const char *my_locale_ab_day_names_th_TH[8] = 
- {"จ.","อ.","พ.","พฤ.","ศ.","ส.","อา.", NullS };
+ {"?.","?.","?.","??.","?.","?.","??.", NullS };
 static TYPELIB my_locale_typelib_month_names_th_TH = 
  { array_elements(my_locale_month_names_th_TH)-1, "", my_locale_month_names_th_TH, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_th_TH = 
@@ -1920,13 +1920,13 @@ MY_LOCALE my_locale_th_TH
 
 /***** LOCALE BEGIN tr_TR: Turkish - Turkey *****/
 static const char *my_locale_month_names_tr_TR[13] = 
- {"Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık", NullS };
+ {"Ocak","?ubat","Mart","Nisan","May?s","Haziran","Temmuz","A?ustos","Eyl��l","Ekim","Kas?m","Aral?k", NullS };
 static const char *my_locale_ab_month_names_tr_TR[13] = 
- {"Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara", NullS };
+ {"Oca","?ub","Mar","Nis","May","Haz","Tem","A?u","Eyl","Eki","Kas","Ara", NullS };
 static const char *my_locale_day_names_tr_TR[8] = 
- {"Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar", NullS };
+ {"Pazartesi","Sal?","?ar?amba","Per?embe","Cuma","Cumartesi","Pazar", NullS };
 static const char *my_locale_ab_day_names_tr_TR[8] = 
- {"Pzt","Sal","Çrş","Prş","Cum","Cts","Paz", NullS };
+ {"Pzt","Sal","?r?","Pr?","Cum","Cts","Paz", NullS };
 static TYPELIB my_locale_typelib_month_names_tr_TR = 
  { array_elements(my_locale_month_names_tr_TR)-1, "", my_locale_month_names_tr_TR, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_tr_TR = 
@@ -1956,13 +1956,13 @@ MY_LOCALE my_locale_tr_TR
 
 /***** LOCALE BEGIN uk_UA: Ukrainian - Ukraine *****/
 static const char *my_locale_month_names_uk_UA[13] = 
- {"Січень","Лютий","Березень","Квітень","Травень","Червень","Липень","Серпень","Вересень","Жовтень","Листопад","Грудень", NullS };
+ {"��?��֧ߧ�","�����ڧ�","���֧�֧٧֧ߧ�","����?��֧ߧ�","����ѧӧ֧ߧ�","���֧�ӧ֧ߧ�","���ڧ�֧ߧ�","���֧��֧ߧ�","���֧�֧�֧ߧ�","����ӧ�֧ߧ�","���ڧ����ѧ�","�����է֧ߧ�", NullS };
 static const char *my_locale_ab_month_names_uk_UA[13] = 
- {"Січ","Лют","Бер","Кві","Тра","Чер","Лип","Сер","Вер","Жов","Лис","Гру", NullS };
+ {"��?��","�����","���֧�","����?","�����","���֧�","���ڧ�","���֧�","���֧�","�����","���ڧ�","�����", NullS };
 static const char *my_locale_day_names_uk_UA[8] = 
- {"Понеділок","Вівторок","Середа","Четвер","П'ятниця","Субота","Неділя", NullS };
+ {"����ߧ֧�?�ݧ��","��?�ӧ�����","���֧�֧է�","���֧�ӧ֧�","��'���ߧڧ��","����ҧ���","���֧�?�ݧ�", NullS };
 static const char *my_locale_ab_day_names_uk_UA[8] = 
- {"Пнд","Втр","Срд","Чтв","Птн","Сбт","Ндл", NullS };
+ {"���ߧ�","�����","�����","�����","�����","���ҧ�","���է�", NullS };
 static TYPELIB my_locale_typelib_month_names_uk_UA = 
  { array_elements(my_locale_month_names_uk_UA)-1, "", my_locale_month_names_uk_UA, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_uk_UA = 
@@ -1992,13 +1992,13 @@ MY_LOCALE my_locale_uk_UA
 
 /***** LOCALE BEGIN ur_PK: Urdu - Pakistan *****/
 static const char *my_locale_month_names_ur_PK[13] = 
- {"جنوري","فروري","مارچ","اپريل","مٓی","جون","جولاي","اگست","ستمبر","اكتوبر","نومبر","دسمبر", NullS };
+ {"?????","?????","????","?????","???","???","?????","????","?????","??????","?????","?????", NullS };
 static const char *my_locale_ab_month_names_ur_PK[13] = 
- {"جنوري","فروري","مارچ","اپريل","مٓی","جون","جولاي","اگست","ستمبر","اكتوبر","نومبر","دسمبر", NullS };
+ {"?????","?????","????","?????","???","???","?????","????","?????","??????","?????","?????", NullS };
 static const char *my_locale_day_names_ur_PK[8] = 
- {"پير","منگل","بدھ","جمعرات","جمعه","هفته","اتوار", NullS };
+ {"???","????","???","??????","????","????","?????", NullS };
 static const char *my_locale_ab_day_names_ur_PK[8] = 
- {"پير","منگل","بدھ","جمعرات","جمعه","هفته","اتوار", NullS };
+ {"???","????","???","??????","????","????","?????", NullS };
 static TYPELIB my_locale_typelib_month_names_ur_PK = 
  { array_elements(my_locale_month_names_ur_PK)-1, "", my_locale_month_names_ur_PK, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_ur_PK = 
@@ -2028,11 +2028,11 @@ MY_LOCALE my_locale_ur_PK
 
 /***** LOCALE BEGIN vi_VN: Vietnamese - Vietnam *****/
 static const char *my_locale_month_names_vi_VN[13] = 
- {"Tháng một","Tháng hai","Tháng ba","Tháng tư","Tháng năm","Tháng sáu","Tháng bảy","Tháng tám","Tháng chín","Tháng mười","Tháng mười một","Tháng mười hai", NullS };
+ {"Th��ng m??t","Th��ng hai","Th��ng ba","Th��ng t?","Th��ng n?m","Th��ng s��u","Th��ng ba?y","Th��ng t��m","Th��ng ch��n","Th��ng m???i","Th��ng m???i m??t","Th��ng m???i hai", NullS };
 static const char *my_locale_ab_month_names_vi_VN[13] = 
  {"Thg 1","Thg 2","Thg 3","Thg 4","Thg 5","Thg 6","Thg 7","Thg 8","Thg 9","Thg 10","Thg 11","Thg 12", NullS };
 static const char *my_locale_day_names_vi_VN[8] = 
- {"Thứ hai ","Thứ ba ","Thứ tư ","Thứ năm ","Thứ sáu ","Thứ bảy ","Chủ nhật ", NullS };
+ {"Th?? hai ","Th?? ba ","Th?? t? ","Th?? n?m ","Th?? s��u ","Th?? ba?y ","Chu? nha?t ", NullS };
 static const char *my_locale_ab_day_names_vi_VN[8] = 
  {"Th 2 ","Th 3 ","Th 4 ","Th 5 ","Th 6 ","Th 7 ","CN ", NullS };
 static TYPELIB my_locale_typelib_month_names_vi_VN = 
@@ -2064,13 +2064,13 @@ MY_LOCALE my_locale_vi_VN
 
 /***** LOCALE BEGIN zh_CN: Chinese - Peoples Republic of China *****/
 static const char *my_locale_month_names_zh_CN[13] = 
- {"一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月", NullS };
+ {"һ��","����","����","����","����","����","����","����","����","ʮ��","ʮһ��","ʮ����", NullS };
 static const char *my_locale_ab_month_names_zh_CN[13] = 
- {" 1月"," 2月"," 3月"," 4月"," 5月"," 6月"," 7月"," 8月"," 9月","10月","11月","12月", NullS };
+ {" 1��"," 2��"," 3��"," 4��"," 5��"," 6��"," 7��"," 8��"," 9��","10��","11��","12��", NullS };
 static const char *my_locale_day_names_zh_CN[8] = 
- {"星期一","星期二","星期三","星期四","星期五","星期六","星期日", NullS };
+ {"����һ","���ڶ�","������","������","������","������","������", NullS };
 static const char *my_locale_ab_day_names_zh_CN[8] = 
- {"一","二","三","四","五","六","日", NullS };
+ {"һ","��","��","��","��","��","��", NullS };
 static TYPELIB my_locale_typelib_month_names_zh_CN = 
  { array_elements(my_locale_month_names_zh_CN)-1, "", my_locale_month_names_zh_CN, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_zh_CN = 
@@ -2100,13 +2100,13 @@ MY_LOCALE my_locale_zh_CN
 
 /***** LOCALE BEGIN zh_TW: Chinese - Taiwan *****/
 static const char *my_locale_month_names_zh_TW[13] = 
- {"一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月", NullS };
+ {"һ��","����","����","����","����","����","����","����","����","ʮ��","ʮһ��","ʮ����", NullS };
 static const char *my_locale_ab_month_names_zh_TW[13] = 
- {" 1月"," 2月"," 3月"," 4月"," 5月"," 6月"," 7月"," 8月"," 9月","10月","11月","12月", NullS };
+ {" 1��"," 2��"," 3��"," 4��"," 5��"," 6��"," 7��"," 8��"," 9��","10��","11��","12��", NullS };
 static const char *my_locale_day_names_zh_TW[8] = 
- {"週一","週二","週三","週四","週五","週六","週日", NullS };
+ {"�Lһ","�L��","�L��","�L��","�L��","�L��","�L��", NullS };
 static const char *my_locale_ab_day_names_zh_TW[8] = 
- {"一","二","三","四","五","六","日", NullS };
+ {"һ","��","��","��","��","��","��", NullS };
 static TYPELIB my_locale_typelib_month_names_zh_TW = 
  { array_elements(my_locale_month_names_zh_TW)-1, "", my_locale_month_names_zh_TW, NULL };
 static TYPELIB my_locale_typelib_ab_month_names_zh_TW = 
@@ -3178,30 +3178,30 @@ MY_LOCALE my_locale_zh_HK
 /***** LOCALE BEGIN el_GR: Greek - Greece *****/
 static const char *my_locale_month_names_el_GR[13]= 
 {
-  "Ιανουάριος", "Φεβρουάριος", "Μάρτιος",
-  "Απρίλιος",   "Μάιος",       "Ιούνιος",
-  "Ιούλιος",    "Αύγουστος",   "Σεπτέμβριος",
-  "Οκτώβριος",  "Νοέμβριος",   "Δεκέμβριος", NullS
+  "�����ͦϦ�?�Ѧɦ�?", "���Ŧ¦ѦϦ�?�Ѧɦ�?", "��?�ѦӦɦ�?",
+  "���Ц�?�˦ɦ�?",   "��?�ɦ�?",       "����?�ͦɦ�?",
+  "����?�˦ɦ�?",    "��?�æϦԦҦӦ�?",   "���ŦЦ�?�̦¦Ѧɦ�?",
+  "���ʦ�?�¦Ѧɦ�?",  "����?�̦¦Ѧɦ�?",   "���Ŧ�?�̦¦Ѧɦ�?", NullS
 };
 
 static const char *my_locale_ab_month_names_el_GR[13]=
 {
-  "Ιαν", "Φεβ", "Μάρ",
-  "Απρ", "Μάι", "Ιούν",
-  "Ιούλ","Αύγ", "Σεπ",
-  "Οκτ", "Νοέ", "Δεκ", NullS
+  "������", "���Ŧ�", "��?��",
+  "���Ц�", "��?��", "����?��",
+  "����?��","��?��", "���Ŧ�",
+  "���ʦ�", "����?", "���Ŧ�", NullS
 };
 
 static const char *my_locale_day_names_el_GR[8] = 
 {
-  "Δευτέρα",   "Τρίτη",   "Τετάρτη", "Πέμπτη",
-  "Παρασκευή", "Σάββατο", "Κυριακή", NullS
+  "���ŦԦ�?�Ѧ�",   "����?�Ӧ�",   "���Ŧ�?�ѦӦ�", "��?�̦ЦӦ�",
+  "�����Ѧ��ҦʦŦ�?", "��?�¦¦��Ӧ�", "���ԦѦɦ���?", NullS
 };
 
 static const char *my_locale_ab_day_names_el_GR[8]= 
 {
-  "Δευ", "Τρί", "Τετ", "Πέμ",
-  "Παρ", "Σάβ", "Κυρ", NullS
+  "���Ŧ�", "����?", "���Ŧ�", "��?��",
+  "������", "��?��", "���Ԧ�", NullS
 };
  
 static TYPELIB my_locale_typelib_month_names_el_GR= 

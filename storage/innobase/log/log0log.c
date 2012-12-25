@@ -725,7 +725,6 @@ log_calc_max_ages(void)
 	log_sys->max_checkpoint_age_async = margin - margin
 		/ LOG_POOL_CHECKPOINT_RATIO_ASYNC;
 	log_sys->max_checkpoint_age = margin;
-
 #ifdef UNIV_LOG_ARCHIVE
 	log_sys->max_archived_lsn_age = smallest_archive_margin;
 
@@ -794,6 +793,8 @@ log_init(void)
 	log_sys->max_buf_free = log_sys->buf_size / LOG_BUF_FLUSH_RATIO
 		- LOG_BUF_FLUSH_MARGIN;
 	log_sys->check_flush_or_checkpoint = TRUE;
+	log_sys->checkpoint_doing = 0;
+	log_sys->checkpoint_waiting = 0;
 	UT_LIST_INIT(log_sys->log_groups);
 
 	log_sys->n_log_ios = 0;
@@ -1340,7 +1341,8 @@ log_write_up_to(
 				IB_ULONGLONG_MAX if not specified */
 	ulint		wait,	/*!< in: LOG_NO_WAIT, LOG_WAIT_ONE_GROUP,
 				or LOG_WAIT_ALL_GROUPS */
-	ibool		flush_to_disk)
+	ibool		flush_to_disk,
+	ibool		flush_check)
 				/*!< in: TRUE if we want the written log
 				also to be flushed to disk */
 {
@@ -1433,6 +1435,20 @@ loop:
 		return;
 	}
 
+	group = UT_LIST_GET_FIRST(log_sys->log_groups);
+
+	//如果日志空间不够，则需要等待checkpoint做完向前推进
+	if (!log_sys->checkpoint_waiting && !log_sys->checkpoint_doing && flush_check &&
+		log_sys->lsn - log_sys->last_checkpoint_lsn > log_sys->max_checkpoint_age)
+	{
+		mutex_exit(&(log_sys->mutex));
+
+		log_sys->checkpoint_waiting = 1;
+		log_check_margins();
+		log_sys->checkpoint_waiting = 0;
+		goto loop;
+	}
+
 #ifdef UNIV_DEBUG
 	if (log_debug_writes) {
 		fprintf(stderr,
@@ -1443,7 +1459,6 @@ loop:
 #endif /* UNIV_DEBUG */
 	log_sys->n_pending_writes++;
 
-	group = UT_LIST_GET_FIRST(log_sys->log_groups);
 	group->n_pending_writes++;	/*!< We assume here that we have only
 					one log group! */
 
@@ -1568,7 +1583,7 @@ log_buffer_flush_to_disk(void)
 
 	mutex_exit(&(log_sys->mutex));
 
-	log_write_up_to(lsn, LOG_WAIT_ALL_GROUPS, TRUE);
+	log_write_up_to(lsn, LOG_WAIT_ALL_GROUPS, TRUE, TRUE);
 }
 
 /****************************************************************//**
@@ -1590,7 +1605,7 @@ log_buffer_sync_in_background(
 
 	mutex_exit(&(log_sys->mutex));
 
-	log_write_up_to(lsn, LOG_NO_WAIT, flush);
+	log_write_up_to(lsn, LOG_NO_WAIT, flush, TRUE);
 }
 
 /********************************************************************
@@ -1620,7 +1635,7 @@ log_flush_margin(void)
 	mutex_exit(&(log->mutex));
 
 	if (lsn) {
-		log_write_up_to(lsn, LOG_NO_WAIT, FALSE);
+		log_write_up_to(lsn, LOG_NO_WAIT, FALSE, FALSE/*这里本身就是在检查，所以不需要*/);
 	}
 }
 
@@ -2002,7 +2017,7 @@ log_checkpoint(
 	write-ahead-logging algorithm ensures that the log has been flushed
 	up to oldest_lsn. */
 
-	log_write_up_to(oldest_lsn, LOG_WAIT_ALL_GROUPS, TRUE);
+	log_write_up_to(oldest_lsn, LOG_WAIT_ALL_GROUPS, TRUE, TRUE);
 
 	mutex_enter(&(log_sys->mutex));
 
@@ -2680,7 +2695,7 @@ arch_none:
 
 		mutex_exit(&(log_sys->mutex));
 
-		log_write_up_to(limit_lsn, LOG_WAIT_ALL_GROUPS, TRUE);
+		log_write_up_to(limit_lsn, LOG_WAIT_ALL_GROUPS, TRUE, TRUE);
 
 		calc_new_limit = FALSE;
 
@@ -3044,6 +3059,16 @@ void
 log_check_margins(void)
 /*===================*/
 {
+	mutex_enter(&(log_sys->mutex));
+	if (log_sys->checkpoint_doing > 0) {
+		mutex_exit(&(log_sys->mutex));
+		return;
+	}
+
+	log_sys->checkpoint_doing++;
+
+	mutex_exit(&(log_sys->mutex));
+	
 loop:
 	log_flush_margin();
 
@@ -3062,6 +3087,8 @@ loop:
 
 		goto loop;
 	}
+
+	log_sys->checkpoint_doing--;
 
 	mutex_exit(&(log_sys->mutex));
 }

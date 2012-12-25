@@ -203,7 +203,8 @@ log_write_up_to(
 				IB_ULONGLONG_MAX if not specified */
 	ulint		wait,	/*!< in: LOG_NO_WAIT, LOG_WAIT_ONE_GROUP,
 				or LOG_WAIT_ALL_GROUPS */
-	ibool		flush_to_disk);
+	ibool		flush_to_disk,
+	ibool		flush_check);
 				/*!< in: TRUE if we want the written log
 				also to be flushed to disk */
 /****************************************************************//**
@@ -795,6 +796,9 @@ struct log_struct{
 					does not reserve the log mutex */
 	UT_LIST_BASE_NODE_T(log_group_t)
 			log_groups;	/*!< log groups */
+
+	ulint		checkpoint_doing;
+	ulint		checkpoint_waiting;
 
 #ifndef UNIV_HOTBACKUP
 	/** The fields involved in the log buffer flush @{ */

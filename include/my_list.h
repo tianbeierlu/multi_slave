@@ -39,7 +39,152 @@ extern int list_walk(LIST *,list_walk_action action,unsigned char * argument);
 #define list_push(a,b) (a)=list_cons((b),(a))
 #define list_pop(A) {LIST *old=(A); (A)=list_delete(old,old); my_free(old); }
 
-#ifdef	__cplusplus
+#define LIST_BASE_NODE_T(TYPE)\
+struct {\
+	int	count;	/* count of nodes in list */\
+	TYPE *	start;	/* pointer to list start, NULL if empty */\
+	TYPE *	end;	/* pointer to list end, NULL if empty */\
+}\
+
+#define LIST_NODE_T(TYPE)\
+struct {\
+	TYPE *	prev;\
+	TYPE *	next;\
+}\
+
+#define LIST_INIT(BASE)\
+do{\
+	(BASE).count = 0;\
+	(BASE).start = NULL;\
+	(BASE).end   = NULL;\
+}while(0)
+
+#define LIST_ADD_FIRST(NAME, BASE, N)\
+do{\
+	((BASE).count)++;\
+	((N)->NAME).next = (BASE).start;\
+	((N)->NAME).prev = NULL;\
+	if ((BASE).start != NULL) {\
+		(((BASE).start)->NAME).prev = (N);\
+	}\
+	(BASE).start = (N);\
+	if ((BASE).end == NULL) {\
+		(BASE).end = (N);\
+	}\
+}while(0)
+
+#define LIST_ADD_LAST(NAME, BASE, N)\
+do{\
+	((BASE).count)++;\
+	((N)->NAME).prev = (BASE).end;\
+	((N)->NAME).next = NULL;\
+	if ((BASE).end != NULL) {\
+		(((BASE).end)->NAME).next = (N);\
+	}\
+	(BASE).end = (N);\
+	if ((BASE).start == NULL) {\
+		(BASE).start = (N);\
+	}\
+}while(0)
+
+#define LIST_DATA_APPEND(lst,d) \
+do{\
+    lst_node_t*  node;\
+    node = (lst_node_t*)my_malloc(sizeof(lst_node_t), MYF(MY_WME));\
+    node->data = (d);\
+    LIST_ADD_LAST(link, (lst), node);\
+}while(0)
+
+#define LIST_DATA_FLAG_APPEND(lst,d,f,g) \
+	do{\
+	lst_node_t*  node;\
+	node = (lst_node_t*)my_malloc(sizeof(lst_node_t), MYF(MY_WME));\
+	node->data = (d);\
+	node->flag = (f);\
+	node->attr = (g);\
+	LIST_ADD_LAST(link, (lst), node);\
+}while(0)
+
+#define LIST_DATA_ADD_FIRST(lst,d) \
+do{\
+    lst_node_t*  node;\
+    node = (lst_node_t*)my_malloc(sizeof(lst_node_t), MYF(MY_WME));\
+    node->data = (void*)(d);\
+    LIST_ADD_FIRST(link, (lst), node);\
+}while(0)
+
+#define LIST_INSERT_BEFORE(NAME, BASE, NODE1, NODE2)\
+do{\
+	((BASE).count)++;\
+	((NODE2)->NAME).next = (NODE1);\
+	((NODE2)->NAME).prev = ((NODE1)->NAME).prev;\
+	if (((NODE1)->NAME).prev != NULL) {\
+		((((NODE1)->NAME).prev)->NAME).next = (NODE2);\
+	}\
+	((NODE1)->NAME).prev = (NODE2);\
+	if ((BASE).start == (NODE1)) {\
+		(BASE).start = (NODE2);\
+	}\
+}while(0)
+
+#define LIST_INSERT_AFTER(NAME, BASE, NODE1, NODE2)\
+do{\
+	((BASE).count)++;\
+	((NODE2)->NAME).prev = (NODE1);\
+	((NODE2)->NAME).next = ((NODE1)->NAME).next;\
+	if (((NODE1)->NAME).next != NULL) {\
+		((((NODE1)->NAME).next)->NAME).prev = (NODE2);\
+	}\
+	((NODE1)->NAME).next = (NODE2);\
+	if ((BASE).end == (NODE1)) {\
+		(BASE).end = (NODE2);\
+	}\
+}while(0)
+
+#define LIST_REMOVE(NAME, BASE, N)\
+do{\
+	((BASE).count)--;\
+	if (((N)->NAME).next != NULL) {\
+		((((N)->NAME).next)->NAME).prev = ((N)->NAME).prev;\
+	} else {\
+		(BASE).end = ((N)->NAME).prev;\
+	}\
+	if (((N)->NAME).prev != NULL) {\
+		((((N)->NAME).prev)->NAME).next = ((N)->NAME).next;\
+	} else {\
+		(BASE).start = ((N)->NAME).next;\
+	}\
+	((N)->NAME).next = NULL;\
+	((N)->NAME).prev = NULL;\
+}while(0)
+
+#define LIST_GET_NEXT(NAME, N)\
+	(((N)->NAME).next)
+
+#define LIST_GET_PREV(NAME, N)\
+	(((N)->NAME).prev)
+
+#define LIST_GET_LEN(BASE)\
+	(BASE).count
+
+#define LIST_GET_FIRST(BASE)\
+	(BASE).start
+
+#define LIST_GET_LAST(BASE)\
+	(BASE).end
+typedef struct lst_node_struct lst_node_t;
+struct lst_node_struct
+{
+	void*					data;
+	void*					flag;
+	int						attr;
+	LIST_NODE_T(lst_node_t) link;
+};
+
+typedef LIST_BASE_NODE_T(lst_node_t) my_lst_t;
+
+#ifdef  __cplusplus
 }
 #endif
+
 #endif

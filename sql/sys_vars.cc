@@ -3194,6 +3194,31 @@ static Sys_var_ulong Sys_slave_trans_retries(
        VALID_RANGE(0, ULONG_MAX), DEFAULT(10), BLOCK_SIZE(1));
 #endif
 
+static Sys_var_ulong Sys_slave_relay_threads(
+	"slave_apply_threads", "slave relay thread count",
+	GLOBAL_VAR(opt_slave_apply_threads), CMD_LINE(REQUIRED_ARG),
+	VALID_RANGE(0, 100), DEFAULT(0), BLOCK_SIZE(1));
+
+static bool check_slave_apply_distribute_mode(sys_var *self, THD *thd, set_var *var)
+{
+	if (!var->value)
+		return true;
+
+	if (var->value->result_type() != STRING_RESULT)
+		return true;
+	
+	if (strcmp(var->save_result.string_value.str, "table") != 0 &&
+		strcmp(var->save_result.string_value.str, "random") != 0)
+		return true;
+
+	return false;
+}
+
+static Sys_var_charptr Sys_slave_apply_distribute_mode(
+	"slave_apply_distribute_mode", "slave relay apply distribute mode, include random mode and table name mode",
+	GLOBAL_VAR(opt_slave_apply_distribute_mode), CMD_LINE(REQUIRED_ARG),
+	IN_SYSTEM_CHARSET, DEFAULT("table"), NO_MUTEX_GUARD, NOT_IN_BINLOG, ON_CHECK(check_slave_apply_distribute_mode));
+
 static bool check_locale(sys_var *self, THD *thd, set_var *var)
 {
   if (!var->value)

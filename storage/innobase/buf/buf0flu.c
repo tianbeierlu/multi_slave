@@ -1118,7 +1118,8 @@ buf_flush_write_block_low(
 	}
 #else
 	/* Force the log to the disk before writing the modified block */
-	log_write_up_to(bpage->newest_modification, LOG_WAIT_ALL_GROUPS, TRUE);
+	log_write_up_to(bpage->newest_modification, LOG_WAIT_ALL_GROUPS, TRUE, FALSE/*这里本身就是在做检查点
+																				所以里面可以不需要检查*/);
 #endif
 	switch (buf_page_get_state(bpage)) {
 	case BUF_BLOCK_ZIP_FREE:

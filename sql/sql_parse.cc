@@ -2635,7 +2635,7 @@ end_with_restore_list:
   }
   {
     mysql_mutex_lock(&LOCK_active_mi);
-    stop_slave(thd,active_mi,1/* net report*/);
+    stop_slave(thd,active_mi,1/* net report*/, 1/*free multi slave thread info*/);
     mysql_mutex_unlock(&LOCK_active_mi);
     break;
   }

@@ -51,6 +51,8 @@
 #include "log_event.h"                          // Rotate_log_event,
                                                 // Create_file_log_event,
                                                 // Format_description_log_event
+#include "sql_db.h"
+#include "my_rdtsc.h"
 
 #ifdef HAVE_REPLICATION
 
@@ -72,6 +74,9 @@ char* slave_load_tmpdir = 0;
 Master_info *active_mi= 0;
 my_bool replicate_same_server_id;
 ulonglong relay_log_space_limit = 0;
+
+multi_slave_t*	multi_slave_info;
+msti_error_info_t*	msti_error_info = NULL;
 
 /*
   When slave thread exits, we need to remember the temporary tables so we
@@ -158,6 +163,8 @@ static int terminate_slave_thread(THD *thd,
                                   volatile uint *slave_running,
                                   bool skip_lock);
 static bool check_io_slave_killed(THD *thd, Master_info *mi, const char *info);
+
+static int multi_distribute_fold(Relay_log_info* rli, char* dbname, char* tablename);
 
 /*
   Find out which replications threads are running
@@ -247,6 +254,558 @@ static void init_slave_psi_keys(void)
 
 /* Initialize slave structures */
 
+static void set_thd_in_use_temporary_tables(Relay_log_info *rli)
+{
+	TABLE *table;
+
+	for (table= rli->save_temporary_tables ; table ; table= table->next)
+		table->in_use= rli->sql_thd;
+}
+
+
+int
+init_multi_slave_single_rli(
+	THD*				thd,
+	Relay_log_info*		rli
+)
+{
+	DBUG_ENTER("init_multi_slave_single_rli");
+
+	thd->thread_stack = (char*)&thd; // remember where our stack is
+	rli->sql_thd= thd;
+
+	/* Inform waiting threads that slave has started */
+	rli->slave_run_id++;
+
+	if (init_slave_thread(thd, SLAVE_THD_SQL))
+	{
+		rli->report(ERROR_LEVEL, ER_SLAVE_FATAL_ERROR, "Failed during slave thread initialization");
+		goto err;
+	}
+
+	thd->init_for_queries();
+	thd->rli_slave= rli;
+	if ((rli->deferred_events_collecting= rpl_filter->is_on()))
+	{
+		rli->deferred_events= new Deferred_log_events(rli);
+	}
+
+	thd->temporary_tables = rli->save_temporary_tables; // restore temp tables
+	set_thd_in_use_temporary_tables(rli);   // (re)set sql_thd in use for saved temp tables
+	mysql_mutex_lock(&LOCK_thread_count);
+	threads.append(thd);
+	mysql_mutex_unlock(&LOCK_thread_count);
+
+	rli->abort_slave = 0;
+	rli->clear_error();
+
+	//tell the I/O thread to take relay_log_space_limit into account from now on
+	mysql_mutex_lock(&rli->log_space_lock);
+	rli->ignore_log_space_limit= 0;
+	mysql_mutex_unlock(&rli->log_space_lock);
+	rli->trans_retries= 0; // start from "no error"
+	DBUG_PRINT("info", ("rli->trans_retries: %lu", rli->trans_retries));
+
+	DBUG_RETURN(0);
+err:
+	DBUG_RETURN(1);
+}
+
+void
+free_multi_slave_single_info(
+	multi_slave_thread_info_t*	msti_info
+)
+{
+	DBUG_ENTER("multi_slave_write_error_group");
+
+	mysql_mutex_lock(&active_mi->rli.free_msti_mutex);
+
+	mysql_cond_destroy(&msti_info->ev_cond);
+	mysql_mutex_destroy(&msti_info->ev_lock);
+	mysql_mutex_destroy(&msti_info->ev_mutex);
+
+	msti_info->exec_rli->cleanup_context(msti_info->exec_thd, 1);
+
+	net_end(&msti_info->exec_thd->net); // destructor will not free it, because we are weird
+	if (msti_info->current_grpinfo != NULL)
+	{
+		free(msti_info->current_grpinfo);
+		msti_info->current_grpinfo = NULL;
+	}
+	
+	if (multi_slave_info != NULL)
+		multi_slave_info->msti_array[msti_info->id] = NULL;
+
+	mysql_mutex_unlock(&active_mi->rli.free_msti_mutex);
+
+	delete msti_info->exec_thd;
+	delete msti_info->exec_rli;
+	free(msti_info);
+
+	DBUG_VOID_RETURN;
+}
+
+char*
+multi_slave_write_error_group(
+	msev_info_t*	group_info,
+	char*			pos
+)
+{
+	DBUG_ENTER("multi_slave_write_error_group");
+
+	if (group_info)
+	{
+		pos = strmov(pos, group_info->curr_evpath);
+		*pos++='\n';
+		pos=longlong2str(group_info->ev_pos, pos, 10);
+		*pos++='\n';
+		free(group_info);
+	}
+
+	DBUG_RETURN(pos);
+}
+
+bool
+multi_slave_process_errors(
+	multi_slave_thread_info_t* msti
+)
+{
+	char error_file_name[FN_REFLEN + 1];
+	char*	buffer;
+	lst_node_t*	ev_node;
+	char*	pos;
+	msev_info_t*	group_info;
+	int		eq;
+	IO_CACHE*			iocache;
+	int					fd;
+	int					buf_len;
+
+	DBUG_ENTER("multi_slave_process_errors");
+
+	//等待handle_slave_sql不再加入新的事件，已经在执行函数free_multi_slave_info
+	while (multi_slave_info->status == 1)
+		my_sleep(200000);
+
+	mysql_mutex_lock(&active_mi->rli.error_mutex);
+
+	buf_len = LIST_GET_LEN(msti->ev_lst) * (FN_REFLEN + 22 + 2) + 1024/*至少有一个*/;
+	buffer = (char*)malloc(buf_len);
+	memset(buffer, 0, buf_len);
+
+	mysql_mutex_lock(&msti->ev_mutex);
+
+	//current_grpinfo肯定是最小值，因为它是链表的FIRST
+	if (msti->current_grpinfo != NULL)
+	{
+		eq = strcmp(msti->current_grpinfo->curr_evpath, active_mi->rli.group_relay_log_name);
+		if (eq < 0 || (eq == 0 && msti->current_grpinfo->ev_pos < active_mi->rli.group_relay_log_pos))
+		{
+			/*将主线程的SLAVE信息更新为未执行过的最小值，在成功写完错误信息之后刷入文件中
+			然后每次重新执行复制时，都是从这个位置开始继续向后做，而有些可能不需要做了，
+			这个从错误信息中可以知道，这里不需要保护，因为主线程已经停止了*/
+			active_mi->rli.group_relay_log_pos= msti->current_grpinfo->ev_pos;
+			strmake(active_mi->rli.group_relay_log_name,msti->current_grpinfo->curr_evpath,
+				sizeof(active_mi->rli.group_relay_log_name)-1);
+		}
+	}
+
+	pos = multi_slave_write_error_group(msti->current_grpinfo, buffer);
+	msti->current_grpinfo = NULL;
+
+	ev_node = LIST_GET_FIRST(msti->ev_lst);
+	while (ev_node != NULL)
+	{
+		LIST_REMOVE(link, msti->ev_lst, ev_node);
+		group_info = (msev_info_t*)ev_node->flag;
+		pos = multi_slave_write_error_group(group_info, pos);
+
+		my_free(ev_node);
+		ev_node = LIST_GET_FIRST(msti->ev_lst);
+	}
+
+	mysql_mutex_unlock(&msti->ev_mutex);
+
+	iocache = multi_slave_info->error_iocache;
+	if (iocache == NULL)
+	{
+		sprintf(error_file_name, "%s%s", mysql_real_data_home_ptr, "msti.log");
+
+		if ((fd= mysql_file_open(0, error_file_name, O_RDWR|O_BINARY|O_CREAT, MYF(MY_WME))) < 0 )
+		{
+			mysql_mutex_unlock(&active_mi->rli.error_mutex);
+			free(buffer);
+			DBUG_RETURN(0);
+		}
+
+		multi_slave_info->error_iocache = (IO_CACHE*)malloc(sizeof(IO_CACHE));
+		iocache = multi_slave_info->error_iocache;
+		multi_slave_info->error_fd = fd;
+		if (init_io_cache(iocache, fd, IO_SIZE * 2, WRITE_CACHE, 0L, 0, MYF(MY_WME)))
+		{
+			free(multi_slave_info->error_iocache);
+			multi_slave_info->error_iocache = NULL;
+			mysql_file_close(fd, MYF(MY_WME));
+			mysql_mutex_unlock(&active_mi->rli.error_mutex);
+			free(buffer);
+			DBUG_RETURN(0);
+		}
+	}
+
+	if (multi_slave_info->error_process == FALSE)
+	{
+		my_b_seek(iocache, 0L);
+		mysql_file_chsize(multi_slave_info->error_fd, 0, 0, MYF(MY_WME));
+	}
+
+	my_b_write(iocache, (uchar*) buffer, (size_t)(pos - buffer));
+	flush_io_cache(iocache);
+	my_sync(multi_slave_info->error_fd, MYF(MY_WME));
+	free(buffer);
+
+	multi_slave_info->error_process = TRUE;
+
+	//完入完成，此时更新SLAVE信息
+	flush_relay_log_info(&active_mi->rli);
+
+	mysql_mutex_unlock(&active_mi->rli.error_mutex);
+
+	DBUG_RETURN(TRUE);
+}
+
+/*
+释放信息时，需要等待所有线程已经成功退出后才能将信息释放
+*/
+void
+free_multi_slave_info(void)
+{
+	uint  inited_threads, i;
+
+	DBUG_ENTER("free_multi_slave_info");
+
+	if (active_mi->rli.opt_slave_apply_threads_inner == 0)
+		DBUG_VOID_RETURN;
+
+	mysql_mutex_lock(&active_mi->rli.free_msti_mutex);
+
+	if (multi_slave_info == NULL)
+	{
+		mysql_mutex_unlock(&active_mi->rli.free_msti_mutex);
+		DBUG_VOID_RETURN;
+	}
+
+	multi_slave_info->status = 0;
+
+	//等待每一个线程都退出
+	while (TRUE)
+	{
+		for (i = 0; i < active_mi->rli.opt_slave_apply_threads_inner; i++)
+		{
+			if (multi_slave_info->msti_array[i] != NULL)
+				mysql_cond_signal(&multi_slave_info->msti_array[i]->ev_cond);
+		}
+
+		mysql_mutex_lock(&multi_slave_info->thread_mutex);
+		inited_threads = multi_slave_info->inited_threads;
+		mysql_mutex_unlock(&multi_slave_info->thread_mutex);
+		if (inited_threads == 0)
+			break;
+
+		my_sleep(50000);
+	}
+
+	mysql_mutex_destroy(&multi_slave_info->thread_mutex);
+
+	mysql_mutex_lock(&active_mi->rli.error_mutex);
+	if (multi_slave_info->error_iocache != NULL)
+	{
+		end_io_cache(multi_slave_info->error_iocache);
+		mysql_file_close(multi_slave_info->error_fd, MYF(MY_WME));
+		free(multi_slave_info->error_iocache);
+		multi_slave_info->error_iocache = NULL;
+	}
+	
+	mysql_mutex_unlock(&active_mi->rli.error_mutex);
+	if (multi_slave_info->group_info != NULL)
+		free(multi_slave_info->group_info);
+	
+	free(multi_slave_info->msti_array);
+	free(multi_slave_info);
+	multi_slave_info = NULL;
+
+	mysql_mutex_unlock(&active_mi->rli.free_msti_mutex);
+
+	DBUG_VOID_RETURN;
+}
+
+uint
+multi_slave_apply_event(
+	multi_slave_thread_info_t*	msti,
+	lst_node_t*					ev_node
+)
+{
+	uint						exec_res;
+	Log_event*					ev;
+	int							attr;
+
+	DBUG_ENTER("multi_slave_apply_event");
+	
+	ev = (Log_event*)ev_node->data;
+	attr = ev_node->attr;
+
+	msti->exec_thd->server_id = ev->server_id; // use the original server id for logging
+	msti->exec_thd->set_time();                            // time the query
+	msti->exec_thd->lex->current_select= 0;
+	ev->thd = msti->exec_thd; // because up to this point, ev->thd == 0
+
+	if ((attr & SLAVE_EVENT_DO_BEGIN) != 0)
+		trans_begin(msti->exec_thd);
+	
+	if (((exec_res = ev->apply_event(msti->exec_rli)) == 0) && (attr & SLAVE_EVENT_DO_COMMIT))
+		trans_commit(msti->exec_thd);
+
+	msti->exec_thd->catalog= 0;
+	msti->exec_thd->set_db(NULL, 0);                 /* will free the current database */
+	msti->exec_thd->reset_query();
+	msti->exec_thd->cleanup_after_query();
+
+	free_root(msti->exec_thd->mem_root,MYF(MY_KEEP_PREALLOC));
+
+	delete ev;
+	my_free(ev_node);
+
+	if (exec_res)
+	{
+		msti->exec_rli->cleanup_context(msti->exec_thd, 1);
+		active_mi->rli.multi_slave_stop = 1;
+
+		//处理所有的没有执行完成的事件，记录下来写入文件?
+		multi_slave_process_errors(msti);
+
+		DBUG_RETURN(exec_res);
+	}
+
+	DBUG_RETURN(0);
+}
+
+void
+multi_slave_get_distribute_mode(
+	Relay_log_info*		rli,
+	char*				dis_mode
+)
+{
+	if (strcmp(dis_mode, "table") == 0)
+	{
+		rli->opt_slave_apply_distribute_mode_inner = SLAVE_DISTRIBUTE_MODE_TABLE;
+	}
+	else
+	{
+		rli->opt_slave_apply_distribute_mode_inner = SLAVE_DISTRIBUTE_MODE_RANDOM;
+	}
+}
+
+void*
+multi_slave_single_thread(
+	void*			arg
+)
+{
+	multi_slave_thread_info_t*	msti;
+	lst_node_t*					ev_node;
+	bool						thread_exit = FALSE;
+	msev_info_t*				group_info;
+
+	DBUG_ENTER("multi_slave_single_thread");
+
+	msti = (multi_slave_thread_info_t*)arg;
+
+	my_thread_init();
+
+	msti->exec_thd = new THD; // note that contructor of THD uses DBUG_ !
+	msti->exec_rli = new Relay_log_info(relay_log_recovery);
+
+	LIST_INIT(msti->ev_lst);
+
+	mysql_cond_init(0, &msti->ev_cond, NULL);
+	mysql_mutex_init(0, &msti->ev_lock, MY_MUTEX_INIT_FAST);
+	mysql_mutex_init(0, &msti->ev_mutex, MY_MUTEX_INIT_FAST);
+
+	msti->current_grpinfo = NULL;
+	if (init_multi_slave_single_rli(msti->exec_thd, msti->exec_rli))
+	{
+		free_multi_slave_single_info(msti);
+		my_thread_end();
+		pthread_exit(0);
+		DBUG_RETURN(NULL);
+	}
+
+	//如果初始化完成，则需要通知主线程可以分发了
+	mysql_mutex_lock(&multi_slave_info->thread_mutex);
+	multi_slave_info->inited_threads++;
+	mysql_mutex_unlock(&multi_slave_info->thread_mutex);
+
+	while (TRUE)
+	{
+		mysql_mutex_lock(&msti->ev_lock);
+		mysql_cond_wait(&msti->ev_cond, &msti->ev_lock);
+		mysql_mutex_unlock(&msti->ev_lock);
+
+		while (TRUE)
+		{
+			mysql_mutex_lock(&msti->ev_mutex);
+			ev_node = LIST_GET_FIRST(msti->ev_lst);
+			if (ev_node == NULL)
+			{
+				mysql_mutex_unlock(&msti->ev_mutex);
+				if (multi_slave_info->status == 0)//如果此时通知退出，则分发线程肯定已经退出，则不会再给salve分发，所以可以退出
+					thread_exit = TRUE;
+				break;
+			}
+
+			LIST_REMOVE(link, msti->ev_lst, ev_node);
+			mysql_mutex_unlock(&msti->ev_mutex);
+
+			//将当前组信息换掉
+			group_info = (msev_info_t*)ev_node->flag;
+			if (group_info != NULL)
+			{
+				if (msti->current_grpinfo != NULL)
+					free(msti->current_grpinfo);
+				msti->current_grpinfo = group_info;
+			}
+
+			if (multi_slave_apply_event(msti, ev_node))
+				thread_exit = TRUE;
+		}
+
+		if (thread_exit == TRUE || multi_slave_info->status == 0)
+			break;
+	}
+
+	//如果初始化完成，则需要通知主线程可以分发了
+	mysql_mutex_lock(&multi_slave_info->thread_mutex);
+	multi_slave_info->inited_threads--;
+	mysql_mutex_unlock(&multi_slave_info->thread_mutex);
+
+	free_multi_slave_single_info(msti);
+
+	free_multi_slave_info();
+
+	my_thread_end();
+	pthread_exit(0);
+
+	DBUG_RETURN(NULL);
+}
+
+int init_multi_slave_thread(Relay_log_info * rli)
+{
+	uint						i;
+	multi_slave_thread_info_t**	msti_array;
+	uint						inited_threads;
+	msev_info_t*				evinfo;
+
+	DBUG_ENTER("init_multi_slave_thread");
+
+	multi_slave_info = (multi_slave_t*)malloc(sizeof(multi_slave_t));
+	multi_slave_info->last_thd_index = 0;
+	multi_slave_info->trans_flag = 0;
+
+	multi_slave_info->msti_array = (multi_slave_thread_info_t**)malloc(sizeof(void*) * active_mi->rli.opt_slave_apply_threads_inner);
+	msti_array = multi_slave_info->msti_array;
+	memset(msti_array, 0, sizeof(void*) * active_mi->rli.opt_slave_apply_threads_inner);
+
+	multi_slave_info->status = 1;
+	LIST_INIT(multi_slave_info->ev_lst);
+	
+	multi_slave_info->inited_threads = 0;
+	mysql_mutex_init(0, &multi_slave_info->thread_mutex, MY_MUTEX_INIT_FAST);
+
+	multi_slave_info->error_process = 0;
+	multi_slave_info->error_iocache = NULL;
+
+	evinfo = (msev_info_t*)malloc(sizeof(msev_info_t));
+	evinfo->ev_pos = rli->group_relay_log_pos;
+	strcpy(evinfo->curr_evpath, rli->group_relay_log_name);
+	multi_slave_info->group_info = evinfo;
+
+	for (i = 0; i < active_mi->rli.opt_slave_apply_threads_inner; i++)
+	{
+		msti_array[i] = (multi_slave_thread_info_t*)malloc(sizeof(multi_slave_thread_info_t));
+		msti_array[i]->id = i;
+
+		if (mysql_thread_create(0, &msti_array[i]->thread_id, &connection_attrib, multi_slave_single_thread, (void*)msti_array[i]))
+		{
+			msti_array[i] = NULL;
+			goto err;
+		}
+	}
+
+	//等待每一个线程启动完成，是否需要？
+	while (TRUE)
+	{
+		mysql_mutex_lock(&multi_slave_info->thread_mutex);
+		inited_threads = multi_slave_info->inited_threads;
+		mysql_mutex_unlock(&multi_slave_info->thread_mutex);
+		if (inited_threads == active_mi->rli.opt_slave_apply_threads_inner)
+			break;
+
+		my_sleep(5000);
+	}
+
+	DBUG_RETURN(0);
+
+err:
+	free_multi_slave_info();
+
+	DBUG_RETURN(1);
+}
+
+void
+msti_slave_add_error_info(
+	char*				group_file_name,
+	my_off_t			pos
+)
+{
+	msev_info_t**		group_info_arr;
+	uint				i;
+	msev_info_t*		group_info;
+	int					eq;
+	DBUG_ENTER("msti_slave_add_error_info");
+
+	if (msti_error_info->group_counts == msti_error_info->array_len)
+	{
+		group_info_arr = (msev_info_t**)malloc(sizeof(msev_info_t*) * (msti_error_info->array_len + MSTI_ERROR_ARRAY_INC_STEP));
+		memcpy(group_info_arr, msti_error_info->group_info, sizeof(msev_info_t*) * msti_error_info->group_counts);
+		msti_error_info->array_len += MSTI_ERROR_ARRAY_INC_STEP;
+
+		free(msti_error_info->group_info);
+		msti_error_info->group_info = group_info_arr;
+	}
+
+	//对位置信息进行排序，然后插入到其中
+	for (i = 0; i < msti_error_info->group_counts; i++)
+	{
+		group_info = msti_error_info->group_info[i];
+		eq = strcmp(group_info->curr_evpath, group_file_name);
+			
+		//已经有了，不再加入
+		if (eq == 0 && group_info->ev_pos == pos)
+			DBUG_VOID_RETURN;
+
+		//已经找到了合适的位置
+		if (eq > 0 || (eq == 0 && group_info->ev_pos >= pos))
+			break;
+	}
+
+	//已经找到合适的位置
+	memmove(&msti_error_info->group_info[i + 1], &msti_error_info->group_info[i], sizeof(msev_info_t*) * (msti_error_info->group_counts - i));
+	msti_error_info->group_info[i] = (msev_info_t*)malloc(sizeof(msev_info_t));
+	strcpy(msti_error_info->group_info[i]->curr_evpath, group_file_name);
+	msti_error_info->group_info[i]->ev_pos = pos;
+	
+	msti_error_info->group_counts++;
+
+	DBUG_VOID_RETURN;
+}
+
 int init_slave()
 {
   DBUG_ENTER("init_slave");
@@ -304,6 +863,8 @@ int init_slave()
 
   if (active_mi->host[0] && !opt_skip_slave_start)
   {
+	multi_slave_get_distribute_mode(&active_mi->rli, opt_slave_apply_distribute_mode);
+	active_mi->rli.opt_slave_apply_threads_inner = opt_slave_apply_threads;
     if (start_slave_threads(1 /* need mutex */,
                             0 /* no wait for start*/,
                             active_mi,
@@ -481,15 +1042,7 @@ void init_slave_skip_errors(const char* arg)
   DBUG_VOID_RETURN;
 }
 
-static void set_thd_in_use_temporary_tables(Relay_log_info *rli)
-{
-  TABLE *table;
-
-  for (table= rli->save_temporary_tables ; table ; table= table->next)
-    table->in_use= rli->sql_thd;
-}
-
-int terminate_slave_threads(Master_info* mi,int thread_mask,bool skip_lock)
+int terminate_slave_threads(Master_info* mi,int thread_mask,bool skip_lock, bool free_msti)
 {
   DBUG_ENTER("terminate_slave_threads");
 
@@ -502,14 +1055,19 @@ int terminate_slave_threads(Master_info* mi,int thread_mask,bool skip_lock)
   if (thread_mask & (SLAVE_SQL|SLAVE_FORCE_ALL))
   {
     DBUG_PRINT("info",("Terminating SQL thread"));
-    mi->rli.abort_slave=1;
+
+	mi->rli.abort_slave=1;
+
+	if (mi->rli.opt_slave_apply_threads_inner > 0)
+		mi->rli.multi_slave_stop = 1;
+
     if ((error=terminate_slave_thread(mi->rli.sql_thd, sql_lock,
                                       &mi->rli.stop_cond,
                                       &mi->rli.slave_running,
                                       skip_lock)) &&
         !force_all)
       DBUG_RETURN(error);
-
+	
     mysql_mutex_lock(log_lock);
 
     DBUG_PRINT("info",("Flushing relay-log info file."));
@@ -795,7 +1353,7 @@ int start_slave_threads(bool need_slave_mutex, bool wait_for_start,
                               &mi->rli.slave_running, &mi->rli.slave_run_id,
                               mi);
     if (error)
-      terminate_slave_threads(mi, thread_mask & SLAVE_IO, !need_slave_mutex);
+      terminate_slave_threads(mi, thread_mask & SLAVE_IO, !need_slave_mutex, 1);
   }
   DBUG_RETURN(error);
 }
@@ -827,7 +1385,7 @@ void end_slave()
       list_walk(&master_list, (list_walk_action)end_slave_on_walk,0);
       once multi-master code is ready.
     */
-    terminate_slave_threads(active_mi,SLAVE_FORCE_ALL);
+    terminate_slave_threads(active_mi,SLAVE_FORCE_ALL, 1);
   }
   mysql_mutex_unlock(&LOCK_active_mi);
   DBUG_VOID_RETURN;
@@ -883,7 +1441,8 @@ static bool sql_slave_killed(THD* thd, Relay_log_info* rli)
 
   DBUG_ASSERT(rli->sql_thd == thd);
   DBUG_ASSERT(rli->slave_running == 1);// tracking buffer overrun
-  if (abort_loop || thd->killed || rli->abort_slave)
+
+  if (abort_loop || thd->killed || rli->abort_slave || rli->multi_slave_stop)
   {
     /*
       The transaction should always be binlogged if OPTION_KEEP_LOG is set
@@ -1049,6 +1608,24 @@ int init_intvar_from_file(int* var, IO_CACHE* f, int default_val)
     DBUG_RETURN(0);
   }
   DBUG_RETURN(1);
+}
+
+int init_llvar_from_file(long long* var, IO_CACHE* f, long long default_val)
+{
+	char buf[32];
+	DBUG_ENTER("init_llvar_from_file");
+
+	if (my_b_gets(f, buf, sizeof(buf)))
+	{
+		*var = strtoll(buf, NULL, 10);
+		DBUG_RETURN(0);
+	}
+	else if (default_val)
+	{
+		*var = default_val;
+		DBUG_RETURN(0);
+	}
+	DBUG_RETURN(1);
 }
 
 int init_floatvar_from_file(float* var, IO_CACHE* f, float default_val)
@@ -2339,6 +2916,579 @@ static int has_temporary_error(THD *thd)
   @retval 2 No error calling ev->apply_event(), but error calling
   ev->update_pos().
 */
+
+int multi_distribute_fold(
+	Relay_log_info*	rli,
+	char*			dbname,
+	char*			tablename
+)
+{
+	int fold = 0;
+	char*	p;
+
+	DBUG_ENTER("multi_distribute_fold");
+
+	if (rli->opt_slave_apply_distribute_mode_inner == SLAVE_DISTRIBUTE_MODE_RANDOM)
+	{
+		DBUG_RETURN((int)((double)(rli->opt_slave_apply_threads_inner * rand()) / (RAND_MAX + 1.0)));
+	}
+	else
+	{
+		DBUG_ASSERT(rli->opt_slave_apply_distribute_mode_inner == SLAVE_DISTRIBUTE_MODE_TABLE);
+		p = dbname;
+		while(*p)
+		{
+			fold += *p;
+			p++;
+		}
+
+		p = tablename;
+		while(*p)
+		{
+			fold += *p;
+			p++;
+		}
+
+		DBUG_RETURN(fold % rli->opt_slave_apply_threads_inner);
+	}
+}
+
+int multi_slave_thread_parse_sql(
+	THD*				main_thd,
+	Parser_state*		parser_state,
+	Query_log_event*	query_log
+)
+{
+	LEX_STRING			new_db;
+	HA_CREATE_INFO		db_options;
+
+	DBUG_ENTER("multi_slave_thread_parse_sql");
+
+	lex_start(main_thd);
+	mysql_reset_thd_for_next_command(main_thd);
+
+	main_thd->catalog= query_log->catalog_len ? (char *) query_log->catalog : (char *)"";
+	new_db.length= query_log->db_len;
+	new_db.str= (char *) rpl_filter->get_rewrite_db(query_log->db, &new_db.length);
+	main_thd->set_db(new_db.str, new_db.length);       /* allocates a copy of 'db' */
+	load_db_opt_by_name(main_thd, main_thd->db, &db_options);
+	if (db_options.default_table_charset)
+		main_thd->db_charset= db_options.default_table_charset;
+
+	if (parse_sql(main_thd, parser_state, NULL))
+	{
+		main_thd->catalog= 0;
+		main_thd->set_db(NULL, 0);
+		main_thd->reset_query();
+		DBUG_RETURN(1);
+	}
+
+	DBUG_RETURN(0);
+}
+
+void
+multi_free_error_info()
+{
+	uint			i;
+	char		error_file_name[FN_REFLEN + 1];
+
+	sprintf(error_file_name, "%s%s", mysql_real_data_home_ptr, "msti.log");
+	remove(error_file_name);
+
+	if (msti_error_info != NULL)
+	{
+		for (i = 0; i < msti_error_info->group_counts; i++)
+			free(msti_error_info->group_info[i]);
+
+		free(msti_error_info->group_info);
+		free(msti_error_info);
+		msti_error_info = NULL;
+	}
+}
+
+bool
+multi_slave_find_group_index(
+	Relay_log_info*		main_rli
+)
+{
+	msev_info_t*		group_info;
+	uint				i;
+	int					eq;
+
+	if (msti_error_info == NULL)
+		return TRUE;
+
+	//如果位置已经超过最后一个，则直接将错误文件删除
+	if (msti_error_info->current_index >= msti_error_info->group_counts)
+	{
+		multi_free_error_info();
+		return TRUE;
+	}
+
+	for (i = msti_error_info->current_index; i < msti_error_info->group_counts; i++)
+	{
+		group_info = msti_error_info->group_info[i];
+
+		//先判断文件名
+		eq = strcmp(group_info->curr_evpath, main_rli->group_relay_log_name);
+		if (eq < 0)
+			continue;
+
+		if (eq > 0)
+			break;
+
+		//如果文件名相同，再判断位置
+		if (group_info->ev_pos < main_rli->group_relay_log_pos)
+			continue;
+
+		if (group_info->ev_pos > main_rli->group_relay_log_pos)
+			break;
+
+		//到此说明已经找到一个相同的
+		msti_error_info->current_index = i;
+
+		return TRUE;
+	}
+
+	//找的位置已经超过最后一个位置了，说明这个信息中已经不会再存在相同的信息，
+	//说明已经做完，此时继续向后做
+	if (i == msti_error_info->group_counts)
+	{
+		multi_free_error_info();
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+uint
+multi_slave_enqueue_wait_and_signal(
+	THD*						thd,
+	Relay_log_info*				rli,
+	multi_slave_thread_info_t*	msti,
+	Log_event*					ev,
+	int							attr
+)
+{
+	uint			count;
+	uint			ret_exec = FALSE;
+
+	DBUG_ENTER("multi_slave_enqueue_wait_and_signal");
+
+retry:
+	if (sql_slave_killed(thd, rli))
+		ret_exec = TRUE;
+	
+	mysql_mutex_lock(&msti->ev_mutex);
+
+	count = LIST_GET_LEN(msti->ev_lst);
+	if (ret_exec == 0 && count > 1000)
+	{
+		mysql_mutex_unlock(&msti->ev_mutex);
+		my_sleep(5000);
+		goto retry;
+	}
+
+	if (multi_slave_info->trans_flag == 0)
+	{
+		attr |= SLAVE_EVENT_DO_BEGIN;
+		multi_slave_info->trans_flag = 1;
+	}
+	
+	LIST_DATA_FLAG_APPEND(msti->ev_lst, ev, multi_slave_info->group_info, attr);
+	multi_slave_info->group_info = NULL;
+
+	mysql_mutex_unlock(&msti->ev_mutex);
+
+	mysql_cond_signal(&msti->ev_cond);//通知相应的线程，开始做
+
+	DBUG_RETURN(ret_exec);
+}
+
+bool multi_slave_sql_can_distribute(
+	LEX *				lex
+)
+{
+	if (lex->sql_command == SQLCOM_INSERT || 
+		lex->sql_command == SQLCOM_DELETE || 
+		lex->sql_command == SQLCOM_UPDATE ||
+		lex->sql_command == SQLCOM_DELETE_MULTI ||
+		lex->sql_command == SQLCOM_UPDATE_MULTI ||
+		lex->sql_command == SQLCOM_INSERT_SELECT ||
+		lex->sql_command == SQLCOM_DROP_INDEX ||
+		lex->sql_command == SQLCOM_DROP_TABLE ||
+		lex->sql_command == SQLCOM_TRUNCATE || 
+		lex->sql_command == SQLCOM_ALTER_TABLE ||
+		lex->sql_command == SQLCOM_CREATE_INDEX ||
+		lex->sql_command == SQLCOM_CREATE_TABLE)
+	{
+		return TRUE;
+	}
+	
+	return FALSE;
+}
+
+int update_event_pos(Log_event* ev, THD* thd, Relay_log_info* rli, int reason)
+{
+	DBUG_ENTER("update_event_pos");
+
+#ifndef DBUG_OFF
+  /*
+    This only prints information to the debug trace.
+
+    TODO: Print an informational message to the error log?
+  */
+  static const char *const explain[] = {
+    // EVENT_SKIP_NOT,
+    "not skipped",
+    // EVENT_SKIP_IGNORE,
+    "skipped because event should be ignored",
+    // EVENT_SKIP_COUNT
+    "skipped because event skip counter was non-zero"
+  };
+  DBUG_PRINT("info", ("OPTION_BEGIN: %d; IN_STMT: %d",
+                      test(thd->variables.option_bits & OPTION_BEGIN),
+                      rli->get_flag(Relay_log_info::IN_STMT)));
+  DBUG_PRINT("skip_event", ("%s event was %s",
+                            ev->get_type_str(), explain[reason]));
+#endif
+
+	int error= ev->update_pos(rli);
+	#ifdef HAVE_purify
+	if (!rli->is_fake)
+	#endif
+	{
+	#ifndef DBUG_OFF
+	  char buf[22];
+	#endif
+	  DBUG_PRINT("info", ("update_pos error = %d", error));
+	  DBUG_PRINT("info", ("group %s %s",
+						  llstr(rli->group_relay_log_pos, buf),
+						  rli->group_relay_log_name));
+	  DBUG_PRINT("info", ("event %s %s",
+						  llstr(rli->event_relay_log_pos, buf),
+						  rli->event_relay_log_name));
+	}
+	/*
+	  The update should not fail, so print an error message and
+	  return an error code.
+
+	  TODO: Replace this with a decent error message when merged
+	  with BUG#24954 (which adds several new error message).
+	*/
+	if (error)
+	{
+	  char buf[22];
+	  rli->report(ERROR_LEVEL, ER_UNKNOWN_ERROR,
+				  "It was not possible to update the positions"
+				  " of the relay log information: the slave may"
+				  " be in an inconsistent state."
+				  " Stopped in %s position %s",
+				  rli->group_relay_log_name,
+				  llstr(rli->group_relay_log_pos, buf));
+	  DBUG_RETURN(2);
+	}
+
+	DBUG_RETURN(0);
+}
+
+int
+multi_slave_append_others_event(
+	Relay_log_info*		main_rli,
+	THD*				main_thd,
+	Log_event*			ev,
+	int					attr
+)
+{
+	multi_slave_thread_info_t*	msti;
+
+	DBUG_ENTER("multi_slave_append_not_dicide_event");
+
+	if (multi_slave_info->last_thd_index == UINT_MAX32)
+	{
+		//不是需要的类型，也就是不可分析的，先缓存起来，然后找到一个可分析的并且
+		//按特性分发后再将这些事件分发到之前的线程去
+		if (multi_slave_info->trans_flag == 0)
+		{
+			attr |= SLAVE_EVENT_DO_BEGIN;
+			multi_slave_info->trans_flag = 1;
+		}
+
+		LIST_DATA_FLAG_APPEND(multi_slave_info->ev_lst, ev, multi_slave_info->group_info, attr);
+		multi_slave_info->group_info = NULL;
+	}
+	else
+	{
+		//在找到分发线程之后，还没有到COMMIT时，这些事件要继续加入到当前线程中
+		msti = multi_slave_info->msti_array[multi_slave_info->last_thd_index];
+		if (multi_slave_enqueue_wait_and_signal(main_thd, main_rli, msti, ev, attr))
+			DBUG_RETURN(1);
+	}
+
+	DBUG_RETURN(0);
+}
+
+int
+multi_slave_process_commit(
+	Relay_log_info*		main_rli,
+	THD*				main_thd,
+	Log_event*			ev
+)
+{
+	DBUG_ENTER("multi_slave_process_commit");
+
+	//事务结果，则切换线程
+	multi_slave_info->last_thd_index = UINT_MAX32;//切换线程，前面的线程已经结束
+
+	//事务提交时，将事务标志去掉
+	main_thd->variables.option_bits &= ~OPTION_BEGIN;
+
+	update_event_pos(ev, main_thd, main_rli, Log_event::EVENT_SKIP_NOT);
+
+	delete ev;
+
+	DBUG_RETURN(0);
+}
+
+int
+multi_slave_dicide_and_enqueue_thread(
+	Relay_log_info*		main_rli,
+	THD*				main_thd,
+	Log_event*			ev,
+	char*				dbname,
+	char*				tabname,
+	int					attr
+)
+{
+	multi_slave_thread_info_t*	msti;
+	lst_node_t*					lst_node;
+
+	DBUG_ENTER("multi_slave_dicide_and_enqueue_thread");
+
+	multi_slave_info->last_thd_index = multi_distribute_fold(main_rli, dbname, tabname);
+	msti = multi_slave_info->msti_array[multi_slave_info->last_thd_index];
+
+	//找到对应的线程之后，此时需要把之前加入到临时链表中的复制过来，同时清空
+	mysql_mutex_lock(&msti->ev_mutex);
+	lst_node = LIST_GET_FIRST(multi_slave_info->ev_lst);
+	while (lst_node != NULL)
+	{
+		LIST_REMOVE(link, multi_slave_info->ev_lst, lst_node);
+		LIST_ADD_LAST(link, msti->ev_lst, lst_node);
+		lst_node = LIST_GET_FIRST(multi_slave_info->ev_lst);
+	}
+
+	mysql_mutex_unlock(&msti->ev_mutex);
+
+	update_event_pos(ev, main_thd, main_rli, Log_event::EVENT_SKIP_NOT);
+
+	if (multi_slave_enqueue_wait_and_signal(main_thd, main_rli, msti, ev, attr))
+		DBUG_RETURN(1);
+
+	DBUG_RETURN(0);
+}
+
+int
+multi_process_query_event(
+	Relay_log_info*		main_rli,
+	THD*				main_thd,
+	Log_event*			ev
+)
+{
+	Query_log_event*	query_log;
+	Parser_state		parser_state;
+	HA_CREATE_INFO		db_options;
+	TABLE_LIST*			tables;
+	LEX *				lex;
+
+	DBUG_ENTER("multi_process_query_event");
+
+	lex = main_thd->lex;
+
+	query_log = (Query_log_event*)(ev);
+	if (strcmp("COMMIT", query_log->query) == 0)
+	{
+		multi_slave_process_commit(main_rli, main_thd, ev);
+	}
+	else if (strcmp("BEGIN", query_log->query) == 0)
+	{
+		multi_slave_info->last_thd_index = UINT_MAX32;
+		//因为分发线程没有实际执行，但是还是要将事务开始结束标志打上去
+		main_thd->variables.option_bits|= OPTION_BEGIN;
+		update_event_pos(ev, main_thd, main_rli, Log_event::EVENT_SKIP_NOT);
+		delete ev;
+	}
+	else
+	{
+		main_thd->set_query((char*)query_log->query, query_log->q_len, main_thd->charset());
+		if (!parser_state.init(main_thd, main_thd->query(), main_thd->query_length()))
+		{
+			if (multi_slave_thread_parse_sql(main_thd, &parser_state, query_log))
+				DBUG_RETURN(1);
+
+			if (multi_slave_sql_can_distribute(lex))
+			{
+				tables = lex->query_tables;
+				
+				if (multi_slave_dicide_and_enqueue_thread(main_rli, main_thd, ev, tables->db, tables->table_name, SLAVE_EVENT_DO_COMMIT))
+					DBUG_RETURN(1);
+
+				//一条SQL语句结果，则需要切换线程
+				multi_slave_info->last_thd_index = UINT_MAX32;//切换线程，前面的线程已经结束
+				multi_slave_info->trans_flag = 0;
+			}
+			else
+			{
+				update_event_pos(ev, main_thd, main_rli, Log_event::EVENT_SKIP_NOT);
+				if (multi_slave_append_others_event(main_rli, main_thd, ev, SLAVE_EVENT_DO_NONE))
+					DBUG_RETURN(1);
+			}
+		}
+		else
+			DBUG_RETURN(1);
+	}
+
+	DBUG_RETURN(0);
+}
+
+int
+multi_slave_process_table_map_event(
+	Relay_log_info*		main_rli,
+	THD*				main_thd,
+	Log_event*			ev
+)
+{
+	char db_mem[FN_REFLEN],		tname_mem[FN_REFLEN];
+	size_t						dummy_len;
+	Table_map_log_event*		table_map_ev;
+
+	table_map_ev = (Table_map_log_event*)ev;
+
+	DBUG_ENTER("multi_slave_process_table_map_event");
+	DBUG_ASSERT(main_rli->sql_thd == main_thd);
+
+	strmov(db_mem, rpl_filter->get_rewrite_db(table_map_ev->get_db_name(), &dummy_len));
+	strmov(tname_mem, table_map_ev->get_table_name());
+
+	if (multi_slave_dicide_and_enqueue_thread(main_rli, main_thd, ev, db_mem, tname_mem, SLAVE_EVENT_DO_NONE))
+		DBUG_RETURN(1);
+
+	DBUG_RETURN(0);
+}
+
+int
+multi_slave_process_rows_event(
+	Relay_log_info*		main_rli,
+	THD*				main_thd,
+	Log_event*			ev
+)
+{
+	Rows_log_event*				rows_event;
+	int							switch_flag = FALSE;
+	int							attr = SLAVE_EVENT_DO_NONE;
+
+	DBUG_ENTER("multi_slave_process_rows_event");
+	DBUG_ASSERT(main_rli->sql_thd == main_thd);
+
+	rows_event = (Rows_log_event*)ev;
+
+	if (rows_event->get_flags(Rows_log_event::STMT_END_F))
+	{
+		switch_flag = TRUE;
+		attr |= SLAVE_EVENT_DO_COMMIT;
+	}
+
+	update_event_pos(ev, main_thd, main_rli, Log_event::EVENT_SKIP_NOT);
+	if (multi_slave_append_others_event(main_rli, main_thd, ev, attr))
+		DBUG_RETURN(1);
+
+	if (switch_flag)
+	{
+		multi_slave_info->last_thd_index = UINT_MAX32;//切换线程，前面的线程已经结束
+		multi_slave_info->trans_flag = 0;
+	}
+	
+	DBUG_RETURN(0);
+}
+
+int multi_slave_sql_distribute(
+	Relay_log_info*		main_rli,
+	THD*				main_thd,
+	Log_event*			ev
+)
+{
+	msev_info_t*		evinfo = NULL;
+
+	DBUG_ENTER("multi_slave_sql_distribute");
+
+	//如果是FORMAT_DESCRIPTION_EVENT类型的事件，直接执行就行了，不再分发
+	if (ev->get_type_code() == FORMAT_DESCRIPTION_EVENT || ev->get_type_code() == ROTATE_EVENT)
+	{
+		ev->apply_event(main_rli);
+		update_event_pos(ev, main_thd, main_rli, ev->shall_skip(main_rli));
+		if (ev->get_type_code() == ROTATE_EVENT)
+			delete ev;
+		DBUG_RETURN(0);
+	}
+
+	//决定这个事件要不要被分发，因为错误处理文件中记录的需要被重新执行的事件还需要处理
+	//因为如果不在这里面的事件将不会被执行
+	if (!multi_slave_find_group_index(main_rli))
+	{
+		update_event_pos(ev, main_thd, main_rli, Log_event::EVENT_SKIP_NOT);
+		delete ev;
+		DBUG_RETURN(0);
+	}
+
+	switch(ev->get_type_code())
+	{
+	case QUERY_EVENT:
+		if (multi_process_query_event(main_rli, main_thd, ev))
+			DBUG_RETURN(1);
+		break;
+
+	case TABLE_MAP_EVENT:
+		if (multi_slave_process_table_map_event(main_rli, main_thd, ev))
+			DBUG_RETURN(1);
+		break;
+
+	case WRITE_ROWS_EVENT:
+	case UPDATE_ROWS_EVENT:
+	case DELETE_ROWS_EVENT:
+		if (multi_slave_process_rows_event(main_rli, main_thd, ev))
+			DBUG_RETURN(1);
+		break;
+
+	case XID_EVENT:
+		multi_slave_process_commit(main_rli, main_thd, ev);
+		break;
+
+	default:
+		update_event_pos(ev, main_thd, main_rli, Log_event::EVENT_SKIP_NOT);
+		if (multi_slave_append_others_event(main_rli, main_thd, ev, SLAVE_EVENT_DO_NONE))
+			DBUG_RETURN(1);
+	}
+
+	if (!((main_thd->variables.option_bits & OPTION_BEGIN) && opt_using_transactions))
+	{
+		DBUG_ASSERT(multi_slave_info->group_info == NULL);
+		evinfo = (msev_info_t*)malloc(sizeof(msev_info_t));
+		evinfo->ev_pos = main_rli->group_relay_log_pos;
+		strcpy(evinfo->curr_evpath, main_rli->group_relay_log_name);
+		multi_slave_info->group_info = evinfo;
+	}
+
+	main_thd->catalog= 0;
+	main_thd->set_db(NULL, 0);                 /* will free the current database */
+	main_thd->reset_query();
+	main_thd->cleanup_after_query();
+
+	free_root(main_thd->mem_root,MYF(MY_KEEP_PREALLOC));
+
+	DBUG_RETURN(0);
+}
+
+
 int apply_event_and_update_pos(Log_event* ev, THD* thd, Relay_log_info* rli)
 {
   int exec_res= 0;
@@ -2388,69 +3538,28 @@ int apply_event_and_update_pos(Log_event* ev, THD* thd, Relay_log_info* rli)
   if (reason == Log_event::EVENT_SKIP_COUNT)
     sql_slave_skip_counter= --rli->slave_skip_counter;
   mysql_mutex_unlock(&rli->data_lock);
-  if (reason == Log_event::EVENT_SKIP_NOT)
-    exec_res= ev->apply_event(rli);
 
-#ifndef DBUG_OFF
-  /*
-    This only prints information to the debug trace.
+  if (active_mi->rli.opt_slave_apply_threads_inner == 0)
+  {
+	  //如果这是从多线程切换过来的，那么这里还要处理错误的事件
+	  if (!multi_slave_find_group_index(rli))
+		  DBUG_RETURN(0);
 
-    TODO: Print an informational message to the error log?
-  */
-  static const char *const explain[] = {
-    // EVENT_SKIP_NOT,
-    "not skipped",
-    // EVENT_SKIP_IGNORE,
-    "skipped because event should be ignored",
-    // EVENT_SKIP_COUNT
-    "skipped because event skip counter was non-zero"
-  };
-  DBUG_PRINT("info", ("OPTION_BEGIN: %d; IN_STMT: %d",
-                      test(thd->variables.option_bits & OPTION_BEGIN),
-                      rli->get_flag(Relay_log_info::IN_STMT)));
-  DBUG_PRINT("skip_event", ("%s event was %s",
-                            ev->get_type_str(), explain[reason]));
-#endif
+	  if (reason == Log_event::EVENT_SKIP_NOT)
+		  exec_res= ev->apply_event(rli);
+
+	  if (exec_res == 0)
+		  update_event_pos(ev, thd, rli, reason);
+  }
+  else
+  {
+	  if (reason == Log_event::EVENT_SKIP_NOT)
+		  exec_res = multi_slave_sql_distribute(rli, thd, ev);
+	  else
+		  update_event_pos(ev, thd, rli, reason);
+  }
 
   DBUG_PRINT("info", ("apply_event error = %d", exec_res));
-  if (exec_res == 0)
-  {
-    int error= ev->update_pos(rli);
-#ifdef HAVE_purify
-    if (!rli->is_fake)
-#endif
-    {
-#ifndef DBUG_OFF
-      char buf[22];
-#endif
-      DBUG_PRINT("info", ("update_pos error = %d", error));
-      DBUG_PRINT("info", ("group %s %s",
-                          llstr(rli->group_relay_log_pos, buf),
-                          rli->group_relay_log_name));
-      DBUG_PRINT("info", ("event %s %s",
-                          llstr(rli->event_relay_log_pos, buf),
-                          rli->event_relay_log_name));
-    }
-    /*
-      The update should not fail, so print an error message and
-      return an error code.
-
-      TODO: Replace this with a decent error message when merged
-      with BUG#24954 (which adds several new error message).
-    */
-    if (error)
-    {
-      char buf[22];
-      rli->report(ERROR_LEVEL, ER_UNKNOWN_ERROR,
-                  "It was not possible to update the positions"
-                  " of the relay log information: the slave may"
-                  " be in an inconsistent state."
-                  " Stopped in %s position %s",
-                  rli->group_relay_log_name,
-                  llstr(rli->group_relay_log_pos, buf));
-      DBUG_RETURN(2);
-    }
-  }
 
   DBUG_RETURN(exec_res ? 1 : 0);
 }
@@ -2556,12 +3665,15 @@ static int exec_relay_log_event(THD* thd, Relay_log_info* rli)
       used to read info about the relay log's format; it will be deleted when
       the SQL thread does not need it, i.e. when this thread terminates.
     */
-    if (ev->get_type_code() != FORMAT_DESCRIPTION_EVENT &&
-        !rli->is_deferred_event(ev))
-    {
-      DBUG_PRINT("info", ("Deleting the event after it has been executed"));
-      delete ev;
-    }
+	if (active_mi->rli.opt_slave_apply_threads_inner == 0)
+	{
+		if (ev->get_type_code() != FORMAT_DESCRIPTION_EVENT &&
+			!rli->is_deferred_event(ev))
+		{
+			DBUG_PRINT("info", ("Deleting the event after it has been executed"));
+			delete ev;
+		}
+	}
 
     /*
       update_log_pos failed: this should not happen, so we don't
@@ -3088,6 +4200,7 @@ err:
     mysql_close(mysql);
     mi->mysql=0;
   }
+  
   write_ignored_events_info_to_relay_log(thd, mi);
   thd_proc_info(thd, "Waiting for slave mutex on exit");
   mysql_mutex_lock(&mi->run_lock);
@@ -3165,6 +4278,46 @@ int check_temp_dir(char* tmp_file)
   DBUG_RETURN(0);
 }
 
+uint
+init_multi_slave_error_info()
+{
+	char				error_file_name[FN_REFLEN + 1];
+	int					fd;
+	IO_CACHE			iocache;
+	char				curr_evpath[FN_REFLEN];//存储当前事件(组)所在的relay-log文件路径
+	my_off_t			pos;
+
+	DBUG_ENTER("init_multi_slave_error_info");
+
+	sprintf(error_file_name, "%s%s", mysql_real_data_home_ptr, "msti.log");
+
+	if ((fd= mysql_file_open(0, error_file_name, O_RDWR|O_BINARY, MYF(MY_WME))) < 0 )
+		DBUG_RETURN(0);
+
+	if (init_io_cache(&iocache, fd, IO_SIZE*2, READ_CACHE, 0L, 0, MYF(MY_WME)))
+		DBUG_RETURN(0);
+
+	msti_error_info = (msti_error_info_t*)malloc(sizeof(msti_error_info_t));
+	msti_error_info->current_index = 0;
+	msti_error_info->group_counts = 0;
+	msti_error_info->group_info = (msev_info_t**)malloc(sizeof(msev_info_t*) * MSTI_ERROR_ARRAY_LEN);
+	msti_error_info->array_len = MSTI_ERROR_ARRAY_LEN;
+
+	while (TRUE)
+	{
+		if (init_strvar_from_file(curr_evpath, sizeof(curr_evpath), &iocache, 0) ||
+			init_llvar_from_file((long long*)&pos, &iocache, 0))
+			break;
+
+		msti_slave_add_error_info(curr_evpath, pos);
+	}
+
+	end_io_cache(&iocache);
+	mysql_file_close(fd, MYF(MY_WME));
+
+	DBUG_RETURN(0);
+}
+
 /**
   Slave SQL thread entry point.
 
@@ -3205,6 +4358,8 @@ pthread_handler_t handle_slave_sql(void *arg)
   /* Inform waiting threads that slave has started */
   rli->slave_run_id++;
   rli->slave_running = 1;
+  rli->sql_thread_running = 1;
+  rli->multi_slave_stop = 0;
 
   pthread_detach_this_thread();
   if (init_slave_thread(thd, SLAVE_THD_SQL))
@@ -3352,8 +4507,19 @@ log '%s' at position %s, relay log '%s' position: %s", RPL_LOG_NAME,
   }
   mysql_mutex_unlock(&rli->data_lock);
 
-  /* Read queries from the IO/THREAD until this thread is killed */
+  if (active_mi->rli.opt_slave_apply_threads_inner > 0)
+  {
+	  //如果没有初始化成功，则多线程SLAVE失效，还用原来的
+	  if (init_multi_slave_thread(rli) || init_multi_slave_error_info())
+		  active_mi->rli.opt_slave_apply_threads_inner = 0;//TODO: add warnings
+  }
+  else
+  {
+	  //如果发生多线程与单线程的切换，则在单线程时也要处理在多线程结束时出错的问题
+	  init_multi_slave_error_info();
+  }
 
+  /* Read queries from the IO/THREAD until this thread is killed */
   while (!sql_slave_killed(thd,rli))
   {
     thd_proc_info(thd, "Reading event from the relay log");
@@ -3450,7 +4616,9 @@ the slave SQL thread with \"SLAVE START\". We stopped at log \
                         "'%s' at position %s",
                         RPL_LOG_NAME, llstr(rli->group_master_log_pos,llbuff));
 
- err:
+err:
+	if (active_mi->rli.opt_slave_apply_threads_inner > 0 && (thd->is_error() || rli->multi_slave_stop || abort_loop))
+		free_multi_slave_info();
 
   /*
     Some events set some playgrounds, which won't be cleared because thread
@@ -3472,9 +4640,11 @@ the slave SQL thread with \"SLAVE START\". We stopped at log \
   mysql_mutex_lock(&rli->run_lock);
   /* We need data_lock, at least to wake up any waiting master_pos_wait() */
   mysql_mutex_lock(&rli->data_lock);
-  DBUG_ASSERT(rli->slave_running == 1); // tracking buffer overrun
+
   /* When master_pos_wait() wakes up it will check this and terminate */
   rli->slave_running= 0;
+  rli->sql_thread_running = 0;
+
   /* Forget the relay log's format */
   delete rli->relay_log.description_event_for_exec;
   rli->relay_log.description_event_for_exec= 0;
@@ -3512,8 +4682,10 @@ the slave SQL thread with \"SLAVE START\". We stopped at log \
   mysql_mutex_unlock(&rli->run_lock);  // tell the world we are done
 
   DBUG_LEAVE;                                   // Must match DBUG_ENTER()
+
   my_thread_end();
   pthread_exit(0);
+
   return 0;                                     // Avoid compiler warnings
 }
 

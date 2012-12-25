@@ -4508,7 +4508,7 @@ next_zip_page:
 					store_len = extern_len;
 				}
 
-				mlog_write_string(page + FIL_PAGE_DATA
+				mlog_write_string(page + FIL_PAGE_DATA//从后面向前面存储数据
 						  + BTR_BLOB_HDR_SIZE,
 						  (const byte*)
 						  big_rec_vec->fields[i].data
@@ -4536,7 +4536,7 @@ next_zip_page:
 
 				mlog_write_ulint(field_ref + BTR_EXTERN_LEN, 0,
 						 MLOG_4BYTES, alloc_mtr);
-				mlog_write_ulint(field_ref
+				mlog_write_ulint(field_ref//存储现在已经总共存储了多少数据
 						 + BTR_EXTERN_LEN + 4,
 						 big_rec_vec->fields[i].len
 						 - extern_len,

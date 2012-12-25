@@ -26,6 +26,13 @@ struct RPL_TABLE_LIST;
 class Master_info;
 extern uint sql_slave_skip_counter;
 
+#define SLAVE_DISTRIBUTE_MODE_TABLE			1
+#define SLAVE_DISTRIBUTE_MODE_RANDOM		2
+
+#define SLAVE_EVENT_DO_NONE					0
+#define SLAVE_EVENT_DO_COMMIT				0x0001
+#define SLAVE_EVENT_DO_BEGIN				0x0002
+
 /****************************************************************************
 
   Replication SQL Thread
@@ -138,13 +145,14 @@ public:
     standard lock acquisition order to avoid deadlocks:
     run_lock, data_lock, relay_log.LOCK_log, relay_log.LOCK_index
   */
-  mysql_mutex_t data_lock, run_lock, sleep_lock;
+  mysql_mutex_t data_lock, run_lock, sleep_lock, free_msti_mutex, msti_mutex, error_mutex;
+;
   /*
     start_cond is broadcast when SQL thread is started
     stop_cond - when stopped
     data_cond - when data protected by data_lock changes
   */
-  mysql_cond_t start_cond, stop_cond, data_cond, sleep_cond;
+  mysql_cond_t start_cond, stop_cond, data_cond, sleep_cond, msti_cond;
   /* parent Master_info structure */
   Master_info *mi;
 
@@ -178,6 +186,8 @@ public:
   ulonglong event_relay_log_pos;
   ulonglong future_event_relay_log_pos;
 
+  ulong opt_slave_apply_threads_inner;
+  ulong opt_slave_apply_distribute_mode_inner;
 #ifdef HAVE_purify
   bool is_fake; /* Mark that this is a fake relay log info structure */
 #endif
@@ -249,6 +259,10 @@ public:
   volatile bool inited;
   volatile bool abort_slave;
   volatile uint slave_running;
+
+  volatile bool multi_slave_stop;
+  volatile bool sql_thread_running;/*多线程已经退出，但SQL线程有可能没有退出，因为他会等待多线程先退出
+								   所以有可能再START SLAVE的时候SQL线程还没有退出*/
 
   /* 
      Condition and its parameters from START SLAVE UNTIL clause.
@@ -540,6 +554,7 @@ private:
 
 // Defined in rpl_rli.cc
 int init_relay_log_info(Relay_log_info* rli, const char* info_fname);
-
+void multi_slave_get_distribute_mode(Relay_log_info* rli, char* dis_mode);
+void multi_free_error_info();
 
 #endif /* RPL_RLI_H */

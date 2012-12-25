@@ -33,6 +33,7 @@ static int count_relay_log_space(Relay_log_info* rli);
 
 // Defined in slave.cc
 int init_intvar_from_file(int* var, IO_CACHE* f, int default_val);
+int init_llvar_from_file(long long * var, IO_CACHE* f, long long default_val);
 int init_strvar_from_file(char *var, int max_size, IO_CACHE *f,
 			  const char *default_val);
 
@@ -70,6 +71,12 @@ Relay_log_info::Relay_log_info(bool is_slave_recovery)
   bzero((char*) &info_file, sizeof(info_file));
   bzero((char*) &cache_buf, sizeof(cache_buf));
   cached_charset_invalidate();
+  mysql_mutex_init(0, &free_msti_mutex, MY_MUTEX_INIT_FAST);
+
+  mysql_cond_init(0, &msti_cond, NULL);
+  mysql_mutex_init(0, &msti_mutex, MY_MUTEX_INIT_FAST);
+  mysql_mutex_init(0, &error_mutex, MY_MUTEX_INIT_FAST);
+
   mysql_mutex_init(key_relay_log_info_run_lock, &run_lock, MY_MUTEX_INIT_FAST);
   mysql_mutex_init(key_relay_log_info_data_lock,
                    &data_lock, MY_MUTEX_INIT_FAST);
@@ -82,6 +89,8 @@ Relay_log_info::Relay_log_info(bool is_slave_recovery)
   mysql_cond_init(key_relay_log_info_log_space_cond, &log_space_cond, NULL);
   mysql_cond_init(key_relay_log_info_sleep_cond, &sleep_cond, NULL);
   relay_log.init_pthread_objects();
+  multi_slave_stop = 0;
+  sql_thread_running = 0;
   DBUG_VOID_RETURN;
 }
 
@@ -90,10 +99,18 @@ Relay_log_info::~Relay_log_info()
 {
   DBUG_ENTER("Relay_log_info::~Relay_log_info");
 
+  
+  mysql_mutex_destroy(&free_msti_mutex);
   mysql_mutex_destroy(&run_lock);
   mysql_mutex_destroy(&data_lock);
   mysql_mutex_destroy(&log_space_lock);
   mysql_mutex_destroy(&sleep_lock);
+
+  mysql_mutex_destroy(&error_mutex);
+
+  mysql_mutex_destroy(&msti_mutex);
+  mysql_cond_destroy(&msti_cond);
+  
   mysql_cond_destroy(&data_cond);
   mysql_cond_destroy(&start_cond);
   mysql_cond_destroy(&stop_cond);
@@ -516,6 +533,7 @@ int init_relay_log_pos(Relay_log_info* rli,const char* log,
     goto err;
   }
 
+  //?：＜|━?：：??????t?：2???：＜y???t?D|━?????
   if (log && rli->relay_log.find_log_pos(&rli->linfo, log, 1))
   {
     *errmsg="Could not find target log during relay log initialization";

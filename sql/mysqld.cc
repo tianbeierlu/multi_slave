@@ -283,6 +283,9 @@ const char *my_localhost= "localhost", *delayed_user= "DELAYED";
 bool opt_large_files= sizeof(my_off_t) > 4;
 static my_bool opt_autocommit; ///< for --autocommit command-line option
 
+//add by wh
+ulong opt_slave_apply_threads;
+char *opt_slave_apply_distribute_mode;
 /*
   Used with --help for detailed option
 */
@@ -4425,9 +4428,9 @@ int mysqld_main(int argc, char **argv)
   openlog(libwrapName, LOG_PID, LOG_AUTH);
 #endif
 
-#ifndef DBUG_OFF
-  test_lc_time_sz();
-#endif
+// #ifndef DBUG_OFF
+//   test_lc_time_sz();
+// #endif
 
   /*
     We have enough space for fiddling with the argv, continue

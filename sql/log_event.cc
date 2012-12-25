@@ -2754,6 +2754,7 @@ Query_log_event::Query_log_event(const char* buf, uint event_len,
   db_len = (uint)buf[Q_DB_LEN_OFFSET]; // TODO: add a check of all *_len vars
   error_code = uint2korr(buf + Q_ERR_CODE_OFFSET);
 
+
   /*
     5.0 format starts here.
     Depending on the format, we may or not have affected/warnings etc
@@ -5265,15 +5266,14 @@ int Rotate_log_event::do_update_pos(Relay_log_info *rli)
       master is 5.0 (even 5.0.1) we will soon get a Format_desc; if the next
       master is 4.0 then the events are in the slave's format (conversion).
     */
-    set_slave_thread_options(thd);
-    set_slave_thread_default_charset(thd, rli);
-    thd->variables.sql_mode= global_system_variables.sql_mode;
-    thd->variables.auto_increment_increment=
-      thd->variables.auto_increment_offset= 1;
+	set_slave_thread_options(thd);
+	set_slave_thread_default_charset(thd, rli);
+	thd->variables.sql_mode= global_system_variables.sql_mode;
+	thd->variables.auto_increment_increment=
+		thd->variables.auto_increment_offset= 1;
   }
   else
     rli->inc_event_relay_log_pos();
-
 
   DBUG_RETURN(0);
 }
